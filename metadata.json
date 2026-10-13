@@ -1,0 +1,8 @@
+{
+  "name": "HR Central",
+  "description": "Internal communication and departmental collaboration platform for HR with messaging, documents, tasks, meetings, and announcements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
