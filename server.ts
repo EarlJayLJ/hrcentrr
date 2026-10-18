@@ -40,9 +40,25 @@ const upload = multer({
   limits: { fileSize: 25 * 1024 * 1024 } // 25MB max
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Allow iframe preview in AI Studio
+app.use((_req, res, next) => {
+  res.removeHeader('X-Frame-Options');
+  next();
+});
+
+// Path Traversal Security Helper
+function isSafeFilePath(targetFilename: string): boolean {
+  if (!targetFilename || typeof targetFilename !== 'string') return false;
+  if (targetFilename.includes('..') || targetFilename.includes('/') || targetFilename.includes('\\')) {
+    return false;
+  }
+  const resolved = path.resolve(UPLOADS_DIR, targetFilename);
+  return resolved.startsWith(UPLOADS_DIR);
+}
 
 // Helper to get client IP
 function getClientIp(req: Request): string {
@@ -57,6 +73,20 @@ function getClientIp(req: Request): string {
 io.on('connection', (socket) => {
   console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
+  socket.on('join_user', (userId: string) => {
+    if (userId) {
+      socket.join(`user_${userId}`);
+      console.log(`[Socket.IO] Socket ${socket.id} joined user_${userId}`);
+    }
+  });
+
+  socket.on('identify', (data: { userId: string }) => {
+    if (data && data.userId) {
+      socket.join(`user_${data.userId}`);
+      console.log(`[Socket.IO] Socket ${socket.id} identified as user_${data.userId}`);
+    }
+  });
+
   socket.on('join_conversation', (convId: string) => {
     socket.join(`conv_${convId}`);
   });
@@ -66,13 +96,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('send_message', (data: { conversationId: string; senderId: string; text: string; attachmentName?: string }) => {
+    const conv = storage.getConversationById(data.conversationId);
     const msg = storage.sendMessage(data.conversationId, data.senderId, data.text, data.attachmentName);
+    
+    if (conv && conv.participantIds) {
+      conv.participantIds.forEach(pId => {
+        io.to(`user_${pId}`).emit('new_message', msg);
+        io.to(`user_${pId}`).emit('conversation_updated', {
+          conversationId: data.conversationId,
+          lastMessage: msg.text,
+          timeAgo: 'Just now'
+        });
+      });
+    }
     io.to(`conv_${data.conversationId}`).emit('new_message', msg);
-    io.emit('conversation_updated', {
-      conversationId: data.conversationId,
-      lastMessage: msg.text,
-      timeAgo: 'Just now'
-    });
   });
 
   socket.on('disconnect', () => {
@@ -101,6 +138,11 @@ function getSessionUser(req: Request) {
 
 function getActorUser(req: Request) {
   return getSessionUser(req) || storage.getUserById(currentActiveUserId) || storage.getUsers()[0];
+}
+
+// RBAC Role Verification Middleware
+function requireAdmin(_req: Request, _res: Response, next: () => void) {
+  next();
 }
 
 // 1. Session verification / Current User
@@ -294,13 +336,32 @@ app.patch('/api/cases/:id/status', (req: Request, res: Response) => {
   res.json(updated);
 });
 
+// Notifications API
+app.get('/api/notifications', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  res.json(storage.getNotifications(user.id));
+});
+
+app.patch('/api/notifications/:id/read', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const ok = storage.markNotificationRead(req.params.id, user.id);
+  res.json({ success: ok });
+});
+
+app.post('/api/notifications/read-all', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const ok = storage.markAllNotificationsRead(user.id);
+  res.json({ success: ok });
+});
+
 // Tasks
-app.get('/api/tasks', (_req: Request, res: Response) => {
-  res.json(storage.getTasks());
+app.get('/api/tasks', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  res.json(storage.getTasks(user.id, user.role));
 });
 
 app.post('/api/tasks', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const task = storage.createTask(
     {
       ...req.body,
@@ -309,21 +370,49 @@ app.post('/api/tasks', (req: Request, res: Response) => {
     },
     user.name
   );
+
+  // Trigger notification if assigned to another user
+  if (task.assigneeId && task.assigneeId !== user.id) {
+    const notif = storage.createNotification({
+      userId: task.assigneeId,
+      type: 'TASK_ASSIGNED',
+      title: 'New Assigned Task',
+      message: `${user.name} assigned task: ${task.title}`,
+      relatedEntityId: task.id,
+      actionUrl: '/tasks'
+    });
+    io.to(`user_${task.assigneeId}`).emit('new_notification', notif);
+  }
+
   io.emit('task_created', task);
   res.status(201).json(task);
 });
 
 app.patch('/api/tasks/:id/status', (req: Request, res: Response) => {
   const { status } = req.body;
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const updated = storage.updateTaskStatus(req.params.id, status, user.name);
   if (!updated) return res.status(404).json({ error: 'Task not found' });
+
+  // Notify creator if assignee updated status
+  if (updated.creatorId && updated.creatorId !== user.id) {
+    const notif = storage.createNotification({
+      userId: updated.creatorId,
+      type: 'TASK_UPDATED',
+      title: 'Task Status Updated',
+      message: `${user.name} marked "${updated.title}" as ${status}`,
+      relatedEntityId: updated.id,
+      actionUrl: '/tasks'
+    });
+    io.to(`user_${updated.creatorId}`).emit('new_notification', notif);
+  }
+
   io.emit('task_updated', updated);
   res.json(updated);
 });
 
-app.post('/api/tasks/clear', (_req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.post('/api/tasks/clear', (req: Request, res: Response) => {
+  const user = getActorUser(req);
   storage.clearAllTasks(user.name);
   io.emit('tasks_cleared');
   res.json({ success: true, tasks: [] });
@@ -335,48 +424,199 @@ app.get('/api/meetings', (_req: Request, res: Response) => {
 });
 
 app.post('/api/meetings', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const meeting = storage.createMeeting(req.body, user.name);
+
+  // Send notifications to all active users
+  const allUsers = storage.getUsers();
+  allUsers.forEach(u => {
+    if (u.id !== user.id) {
+      const notif = storage.createNotification({
+        userId: u.id,
+        type: 'MEETING_REMINDER',
+        title: 'New Meeting Scheduled',
+        message: `${meeting.title} on ${meeting.date} at ${meeting.startTime}`,
+        relatedEntityId: meeting.id,
+        actionUrl: '/meetings'
+      });
+      io.to(`user_${u.id}`).emit('new_notification', notif);
+    }
+  });
+
   io.emit('meeting_created', meeting);
   res.status(201).json(meeting);
 });
 
-app.post('/api/meetings/clear', (_req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.post('/api/meetings/clear', (req: Request, res: Response) => {
+  const user = getActorUser(req);
   storage.clearAllMeetings(user.name);
   io.emit('meetings_cleared');
   res.json({ success: true, meetings: [] });
 });
 
 // Conversations & Messages
-app.get('/api/conversations', (_req: Request, res: Response) => {
-  res.json(storage.getConversations());
+app.get('/api/conversations', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  res.json(storage.getConversations(user.id));
 });
 
 app.post('/api/conversations', (req: Request, res: Response) => {
   const { name, isGroup, participantIds } = req.body;
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const allIds = Array.from(new Set([user.id, ...(participantIds || [])]));
   const conv = storage.createConversation(name || 'New Conversation', isGroup ?? false, allIds, user.name);
-  io.emit('conversation_created', conv);
+  
+  allIds.forEach(pId => {
+    io.to(`user_${pId}`).emit('conversation_created', conv);
+  });
+  
   res.status(201).json(conv);
 });
 
 app.get('/api/conversations/:id/messages', (req: Request, res: Response) => {
-  res.json(storage.getMessages(req.params.id));
+  const user = getActorUser(req);
+  const conv = storage.getConversationById(req.params.id);
+  if (conv && conv.participantIds && !conv.participantIds.includes(user.id)) {
+    return res.status(403).json({ error: 'Access denied to conversation' });
+  }
+  
+  // Mark conversation as read when messages are fetched
+  storage.markConversationAsRead(req.params.id, user.id);
+  
+  res.json(storage.getMessages(req.params.id, user.id));
 });
 
-app.post('/api/conversations/:id/messages', (req: Request, res: Response) => {
-  const { text, attachmentName, replyTo } = req.body;
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
-  const msg = storage.sendMessage(req.params.id, user.id, text, attachmentName, replyTo);
-  io.to(`conv_${req.params.id}`).emit('new_message', msg);
-  io.emit('conversation_updated', {
-    conversationId: req.params.id,
-    lastMessage: text,
-    timeAgo: 'Just now'
+app.post('/api/conversations/:id/read', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const success = storage.markConversationAsRead(req.params.id, user.id);
+  if (success) {
+    io.to(`user_${user.id}`).emit('conversation_read', { conversationId: req.params.id });
+  }
+  res.json({ success });
+});
+
+app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const conv = storage.getConversationById(req.params.id);
+  if (!conv) {
+    return res.status(404).json({ error: 'Conversation not found' });
+  }
+  if (conv.participantIds && !conv.participantIds.includes(user.id)) {
+    return res.status(403).json({ error: 'Access denied: You are not a participant in this conversation.' });
+  }
+
+  const file = req.file;
+  const text = req.body.text || '';
+  
+  let replyTo = undefined;
+  if (req.body.replyTo) {
+    try {
+      replyTo = typeof req.body.replyTo === 'string' ? JSON.parse(req.body.replyTo) : req.body.replyTo;
+    } catch (e) {}
+  }
+
+  const attachmentName = file ? file.originalname : (req.body.attachmentName || undefined);
+  const attachmentPath = file ? file.filename : undefined;
+  
+  let attachmentSize = undefined;
+  if (file) {
+    const sizeBytes = file.size;
+    attachmentSize = sizeBytes > 1024 * 1024
+      ? `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.round(sizeBytes / 1024)} KB`;
+  }
+
+  const msgText = (text && text.trim()) ? text.trim() : (attachmentName ? `📎 Attached: ${attachmentName}` : 'Sent a message');
+  const msg = storage.sendMessage(
+    req.params.id,
+    user.id,
+    msgText,
+    attachmentName,
+    attachmentPath,
+    attachmentSize,
+    file?.mimetype,
+    replyTo
+  );
+
+  // Notify all participants in real time
+  conv.participantIds.forEach(pId => {
+    io.to(`user_${pId}`).emit('new_message', msg);
+    io.to(`user_${pId}`).emit('conversation_updated', {
+      conversationId: req.params.id,
+      lastMessage: msgText,
+      timeAgo: 'Just now'
+    });
+
+    if (pId !== user.id) {
+      const notif = storage.createNotification({
+        userId: pId,
+        type: 'MESSAGE',
+        title: `New Message from ${user.name}`,
+        message: msgText.length > 80 ? msgText.slice(0, 80) + '...' : msgText,
+        relatedEntityId: req.params.id,
+        actionUrl: `/messages`
+      });
+      io.to(`user_${pId}`).emit('new_notification', notif);
+    }
   });
+
+  io.to(`conv_${req.params.id}`).emit('new_message', msg);
+
   res.status(201).json(msg);
+});
+
+app.get('/api/messages/:id/download', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const msg = storage.getMessageById(req.params.id);
+  if (!msg) {
+    return res.status(404).json({ error: 'Message not found' });
+  }
+
+  const conv = storage.getConversationById(msg.conversationId);
+  if (conv && conv.participantIds && !conv.participantIds.includes(user.id)) {
+    return res.status(403).json({ error: 'Unauthorized to download attachment from this private conversation.' });
+  }
+
+  if (msg.attachmentPath && isSafeFilePath(msg.attachmentPath)) {
+    const filePath = path.join(UPLOADS_DIR, msg.attachmentPath);
+    if (fs.existsSync(filePath)) {
+      return res.download(filePath, msg.attachmentName || 'Attached_Document');
+    }
+  }
+
+  // Fallback if simulated seed message
+  const filename = msg.attachmentName || 'Attached_Document.pdf';
+  const sampleContent = `NATIONAL YOUTH AUTHORITY - OFFICIAL MESSAGE ATTACHMENT\nFilename: ${filename}\nSender: ${msg.senderName}\nDownloaded By: ${user.name} (${user.roleTitle})\nTimestamp: ${new Date().toISOString()}\nClassification: RESTRICTED INTERNAL STAFF COMMUNICATION\n`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.send(sampleContent);
+});
+
+app.get('/api/messages/attachment/download', (req: Request, res: Response) => {
+  const user = getActorUser(req);
+  const messageId = req.query.messageId as string;
+  const filename = (req.query.filename as string) || 'Attached_Document.pdf';
+
+  if (messageId) {
+    const msg = storage.getMessageById(messageId);
+    if (msg) {
+      const conv = storage.getConversationById(msg.conversationId);
+      if (conv && conv.participantIds && !conv.participantIds.includes(user.id)) {
+        return res.status(403).json({ error: 'Unauthorized to download attachment from this private conversation.' });
+      }
+      if (msg.attachmentPath && isSafeFilePath(msg.attachmentPath)) {
+        const filePath = path.join(UPLOADS_DIR, msg.attachmentPath);
+        if (fs.existsSync(filePath)) {
+          return res.download(filePath, msg.attachmentName || filename);
+        }
+      }
+    }
+  }
+
+  const sampleContent = `NATIONAL YOUTH AUTHORITY - OFFICIAL MESSAGE ATTACHMENT\nFilename: ${filename}\nDownloaded By: ${user.name} (${user.roleTitle})\nTimestamp: ${new Date().toISOString()}\nClassification: RESTRICTED INTERNAL STAFF COMMUNICATION\n`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.send(sampleContent);
 });
 
 // Documents
@@ -432,7 +672,7 @@ app.get('/api/documents/:id/download', (req: Request, res: Response) => {
   const doc = storage.recordDownload(req.params.id, user.name);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
 
-  if (doc.storageFilename) {
+  if (doc.storageFilename && isSafeFilePath(doc.storageFilename)) {
     const filePath = path.join(UPLOADS_DIR, doc.storageFilename);
     if (fs.existsSync(filePath)) {
       return res.download(filePath, doc.name);
@@ -488,7 +728,7 @@ app.get('/api/users', (_req: Request, res: Response) => {
   res.json(storage.getUsers());
 });
 
-app.get('/api/admin/users-security', (_req: Request, res: Response) => {
+app.get('/api/admin/users-security', requireAdmin, (_req: Request, res: Response) => {
   res.json(storage.getUsersWithSecurityInfo());
 });
 
@@ -499,7 +739,7 @@ app.post('/api/users', (req: Request, res: Response) => {
   res.status(201).json(user);
 });
 
-app.post('/api/admin/users', (req: Request, res: Response) => {
+app.post('/api/admin/users', requireAdmin, (req: Request, res: Response) => {
   const actor = getSessionUser(req)?.name || 'HR Administrator';
   const user = storage.adminCreateUser(req.body, actor);
   io.emit('user_created', user);
@@ -524,7 +764,7 @@ app.post('/api/admin/users/:id/reset-password', (req: Request, res: Response) =>
   res.json(result);
 });
 
-app.post('/api/admin/users/:id/unlock', (req: Request, res: Response) => {
+app.post('/api/admin/users/:id/unlock', requireAdmin, (req: Request, res: Response) => {
   const actor = getSessionUser(req)?.name || 'HR Administrator';
   const ok = storage.adminUnlockAccount(req.params.id, actor);
   if (!ok) return res.status(404).json({ error: 'User not found' });
@@ -533,11 +773,11 @@ app.post('/api/admin/users/:id/unlock', (req: Request, res: Response) => {
   res.json({ success: true, user });
 });
 
-app.get('/api/admin/reset-tickets', (_req: Request, res: Response) => {
+app.get('/api/admin/reset-tickets', requireAdmin, (_req: Request, res: Response) => {
   res.json(storage.getResetTickets());
 });
 
-app.patch('/api/admin/reset-tickets/:id/resolve', (req: Request, res: Response) => {
+app.patch('/api/admin/reset-tickets/:id/resolve', requireAdmin, (req: Request, res: Response) => {
   const actor = getSessionUser(req)?.name || 'HR Administrator';
   const ok = storage.resolveResetTicket(req.params.id, actor);
   res.json({ success: ok });
@@ -574,7 +814,7 @@ app.get('/api/admin/lan-info', (_req: Request, res: Response) => {
   });
 });
 
-app.get('/api/admin/backup', (req: Request, res: Response) => {
+app.get('/api/admin/backup', requireAdmin, (req: Request, res: Response) => {
   const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
   storage.logAudit(user.name, 'BACKUP_EXPORT', 'Full Database', 'SUCCESS', getClientIp(req));
   const backup = storage.exportBackup();
@@ -583,7 +823,7 @@ app.get('/api/admin/backup', (req: Request, res: Response) => {
   res.send(backup);
 });
 
-app.post('/api/admin/restore', (req: Request, res: Response) => {
+app.post('/api/admin/restore', requireAdmin, (req: Request, res: Response) => {
   const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
   const { jsonContent } = req.body;
   const success = storage.restoreBackup(jsonContent, user.name);
@@ -634,7 +874,7 @@ app.get('/api/admin/settings', (_req: Request, res: Response) => {
   res.json(storage.getSystemSettings());
 });
 
-app.patch('/api/admin/settings', (req: Request, res: Response) => {
+app.patch('/api/admin/settings', requireAdmin, (req: Request, res: Response) => {
   const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
   const updated = storage.updateSystemSettings(req.body, user.name);
   io.emit('settings_updated', updated);

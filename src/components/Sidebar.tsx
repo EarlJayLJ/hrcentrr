@@ -9,7 +9,8 @@ import {
   Calendar,
   BarChart3,
   Shield,
-  MessageSquare
+  MessageSquare,
+  Settings
 } from 'lucide-react';
 import { Conversation } from '../types.ts';
 
@@ -43,193 +44,174 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [messagesExpanded, setMessagesExpanded] = useState(true);
 
+  const navItems = [
+    {
+      id: 'dashboard' as ActiveTab,
+      label: 'Dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      id: 'tasks' as ActiveTab,
+      label: 'Tasks',
+      icon: CheckSquare,
+      badge: tasksCount > 0 ? tasksCount : undefined
+    },
+    {
+      id: 'meetings' as ActiveTab,
+      label: 'Meetings',
+      icon: Calendar
+    },
+    {
+      id: 'messages' as ActiveTab,
+      label: 'Messages',
+      icon: MessageSquare
+    },
+    {
+      id: 'saved' as ActiveTab,
+      label: 'Announcements',
+      icon: Megaphone
+    },
+    {
+      id: 'libraries' as ActiveTab,
+      label: 'Documents',
+      icon: Bookmark
+    },
+    {
+      id: 'reports' as ActiveTab,
+      label: 'Reports',
+      icon: BarChart3
+    },
+    {
+      id: 'admin' as ActiveTab,
+      label: 'Administration',
+      icon: Shield
+    }
+  ];
+
   return (
-    <aside className="w-56 shrink-0 flex flex-col justify-between py-6 px-4 select-none border-r border-slate-200 bg-white">
+    <aside className="w-60 shrink-0 flex flex-col justify-between py-6 px-3.5 select-none border-r border-white/50 bg-white/[0.18] backdrop-blur-xl text-black shadow-[inset_0_1px_1px_rgba(255,255,255,0.75)]">
       <div className="space-y-6">
-        {/* Brand Logo */}
-        <div className="px-3 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-white p-0.5 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center overflow-hidden">
+        {/* Brand Logo & Authority Lockup */}
+        <div className="px-2.5 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#7738FF]/20 via-[#9A75FF]/10 to-transparent p-0.5 border border-white/80 shadow-xs shrink-0 flex items-center justify-center overflow-hidden">
             <img
               src="/logo.jpg"
               alt="Ghana Youth Authority Logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-xl bg-white p-0.5"
               onError={(e) => {
-                // Fallback if image path has issue
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
           </div>
-          <div>
-            <div className="font-extrabold text-slate-900 tracking-tight text-sm leading-tight">
-              HR Central
+          <div className="min-w-0">
+            <div className="font-bold text-black tracking-tight text-sm leading-tight flex items-center gap-1.5">
+              <span>HR Central</span>
             </div>
-            <div className="text-[10px] text-slate-500 font-semibold truncate">
+            <div className="text-[10px] text-black font-bold truncate tracking-wide">
               Ghana Youth Authority
             </div>
           </div>
         </div>
 
-        {/* Navigation Section */}
+        {/* Navigation Section (Active pill matching screenshot) */}
         <div>
-          <div className="space-y-1">
-            {/* Dashboard Navigation Item */}
-            <button
-              onClick={() => onSelectTab('dashboard')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'dashboard'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <LayoutDashboard className="w-4 h-4 text-slate-700" />
-              <span>Dashboard</span>
-            </button>
-
-            {/* Tasks with emerald badge */}
-            <button
-              onClick={() => onSelectTab('tasks')}
-              className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'tasks'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <CheckSquare className="w-4 h-4 text-slate-700" />
-                <span>Tasks</span>
-              </div>
-              <span className="w-5 h-5 rounded-full bg-[#006b3f] text-white text-[11px] font-bold flex items-center justify-center">
-                {tasksCount}
-              </span>
-            </button>
-
-            {/* Libraries (Documents Repository) */}
-            <button
-              onClick={() => onSelectTab('libraries')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'libraries'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <Bookmark className="w-4 h-4 text-slate-700" />
-              <span>Libraries</span>
-            </button>
-
-            {/* Announcements */}
-            <button
-              onClick={() => onSelectTab('saved')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'saved'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <Megaphone className="w-4 h-4 text-slate-700" />
-              <span>Announcement</span>
-            </button>
-
-            {/* Meetings Calendar */}
-            <button
-              onClick={() => onSelectTab('meetings')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'meetings'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <Calendar className="w-4 h-4 text-slate-700" />
-              <span>Meetings</span>
-            </button>
-
-            {/* Reports & Audit */}
-            <button
-              onClick={() => onSelectTab('reports')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'reports'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 text-slate-700" />
-              <span>Reports</span>
-            </button>
-
-            {/* Admin & LAN Console */}
-            <button
-              onClick={() => onSelectTab('admin')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition cursor-pointer ${
-                activeTab === 'admin'
-                  ? 'bg-slate-100 font-bold text-slate-900 border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              <Shield className="w-4 h-4 text-slate-700" />
-              <span>Administration</span>
-            </button>
+          <div className="space-y-1.5">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  className={`sidebar-nav-item w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-bold rounded-2xl transition-all cursor-pointer ${
+                    isActive
+                      ? 'glass-liquid-nav-active font-bold text-black scale-[1.02]'
+                      : 'text-black hover:text-black hover:bg-white/80 border border-transparent hover:border-white/90'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="sidebar-icon-wrapper">
+                      <Icon
+                        className={`w-4 h-4 sidebar-icon-inflate transition-colors ${
+                          isActive ? 'text-black drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-black'
+                        }`}
+                      />
+                    </div>
+                    <span className="text-black font-bold">{item.label}</span>
+                  </div>
+                  {item.badge !== undefined && (
+                    <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#7738FF]/20 border border-[#7738FF]/40 text-black text-[10px] font-bold flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* RECENT MESSAGES SECTION */}
+        {/* RECENT MESSAGES EXPANDABLE SECTION */}
         <div className="pt-2">
           <button
             onClick={() => setMessagesExpanded(!messagesExpanded)}
-            className="w-full flex items-center justify-between px-3 pb-2 text-xs font-bold text-slate-700 cursor-pointer"
+            className="w-full flex items-center justify-between px-3 pb-2 text-[11px] font-bold text-black hover:text-black uppercase tracking-wider cursor-pointer"
           >
-            <span>Messages</span>
+            <span className="text-black font-bold">Direct Channels</span>
             {messagesExpanded ? (
-              <ChevronUp className="w-3 h-3 text-slate-400" />
+              <ChevronUp className="w-3.5 h-3.5 text-black" />
             ) : (
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-black" />
             )}
           </button>
 
           {messagesExpanded && (
-            <div className="space-y-1.5 px-1">
+            <div className="space-y-1 px-1">
               {recentConversations.slice(0, 3).map((conv) => (
                 <button
                   key={conv.id}
                   onClick={() => {
                     onOpenConversation(conv.id);
                   }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition text-left cursor-pointer group"
+                  className="sidebar-nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-white/80 transition text-left cursor-pointer group border border-transparent hover:border-white/90"
                 >
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 shadow-2xs"
-                    style={{ backgroundColor: conv.avatarBg }}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-black shrink-0 shadow-xs ring-1 ring-white"
+                    style={{ backgroundColor: conv.avatarBg || '#7738FF' }}
                   >
                     {conv.avatarText}
                   </div>
-                  <span className="text-xs font-medium text-slate-700 group-hover:text-slate-900 truncate flex-1">
+                  <span className="text-xs font-bold text-black group-hover:text-black truncate flex-1">
                     {conv.name}
                   </span>
                   {conv.unreadCount > 0 && (
-                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#7738FF] shadow-[0_0_6px_#7738FF] shrink-0"></span>
                   )}
                 </button>
               ))}
 
               <button
                 onClick={() => onSelectTab('messages')}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 cursor-pointer"
+                className="sidebar-nav-item w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-bold text-black hover:text-black cursor-pointer transition-colors"
               >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>Open Messenger</span>
+                <div className="sidebar-icon-wrapper">
+                  <MessageSquare className="w-3.5 h-3.5 sidebar-icon-inflate text-black" />
+                </div>
+                <span className="text-black font-bold">Open Messenger</span>
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* LAN Offline Badge */}
-      <div className="px-3 pt-4 border-t border-slate-200">
-        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
-          <div className="font-bold text-slate-800 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            LAN Server Active
+      {/* LAN Server & Autonomous Mode Badge */}
+      <div className="px-1 pt-4 border-t border-slate-300">
+        <div className="p-3 rounded-2xl bg-white/70 border border-white/90 shadow-xs text-[11px] text-black">
+          <div className="font-bold text-black flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981] animate-pulse"></span>
+            <span className="text-black font-bold">LAN Engine Active</span>
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
-            Zero Internet Dependency
+          <div className="text-[10px] text-black font-bold mt-0.5">
+            Offline Resilient Architecture
           </div>
         </div>
       </div>

@@ -11,7 +11,8 @@ import {
   DocumentItem,
   Announcement,
   AuditLog,
-  DashboardData
+  DashboardData,
+  NotificationItem
 } from '../src/types.js';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -81,6 +82,7 @@ export interface AppDatabase {
   documents: DocumentItem[];
   announcements: Announcement[];
   auditLogs: AuditLog[];
+  notifications?: NotificationItem[];
   resetTickets?: PasswordResetTicket[];
   systemSettings: {
     orgName: string;
@@ -97,13 +99,13 @@ const defaultSeedData: AppDatabase = {
   users: [
     {
       id: 'u1',
-      name: 'Christian Aboagye',
-      email: 'christian.aboagye@nya.gov.gh',
-      username: 'christian.aboagye',
+      name: 'Ekow Eshun',
+      email: 'ekow.eshun@nya.gov.gh',
+      username: 'ekow.eshun',
       role: 'HR_ADMIN',
       roleTitle: 'HEAD OF HR & OPERATIONS',
-      avatarText: 'CA',
-      avatarBg: '#ea580c',
+      avatarText: 'EE',
+      avatarBg: '#006b3f',
       status: 'ACTIVE',
       department: 'Human Resources Directorate',
       joinedDate: '2022-03-01',
@@ -151,12 +153,12 @@ const defaultSeedData: AppDatabase = {
     },
     {
       id: 'u4',
-      name: 'Abena Oforiwaa',
-      email: 'a.oforiwaa@nya.gov.gh',
-      username: 'a.oforiwaa',
+      name: 'Miss Gloria',
+      email: 'miss.gloria@nya.gov.gh',
+      username: 'miss.gloria',
       role: 'HR_OFFICER',
       roleTitle: 'Senior Personnel Officer',
-      avatarText: 'AO',
+      avatarText: 'MG',
       avatarBg: '#ec4899',
       status: 'ACTIVE',
       department: 'Staff Welfare & NSSP Coordination',
@@ -259,9 +261,9 @@ const defaultSeedData: AppDatabase = {
       },
       assignee: {
         id: 'u1',
-        name: 'Christian Aboagye',
-        initials: 'CA',
-        color: '#ea580c'
+        name: 'Ekow Eshun',
+        initials: 'EE',
+        color: '#006b3f'
       },
       status: 'PENDING_ACCEPTANCE',
       description: 'Comprehensive audit of technical instructors and vocational training facilitators across 11 Youth Leadership and Skills Training Institutes.',
@@ -305,8 +307,8 @@ const defaultSeedData: AppDatabase = {
       },
       assignee: {
         id: 'u4',
-        name: 'Abena Oforiwaa',
-        initials: 'AO',
+        name: 'Miss Gloria',
+        initials: 'MG',
         color: '#ec4899'
       },
       status: 'IN_PROGRESS',
@@ -339,15 +341,142 @@ const defaultSeedData: AppDatabase = {
       createdDate: '2024-05-24'
     }
   ],
-  tasks: [],
-  meetings: [],
+  tasks: [
+    {
+      id: 't1',
+      title: 'Review Q3 Regional Directorate Staff Allocations',
+      description: 'Audit personnel headcount across Ashanti, Western, and Northern regional secretariats.',
+      priority: 'High',
+      status: 'PENDING',
+      dueDate: 'Oct 20, 2026',
+      assigneeId: 'u1',
+      assigneeName: 'Ekow Eshun',
+      creatorId: 'u1',
+      creatorName: 'Ekow Eshun',
+      category: 'Operations',
+      createdAt: '2026-10-10',
+      commentsCount: 2,
+      isMyTask: true
+    },
+    {
+      id: 't2',
+      title: 'Audit Regional Welfare Health Subscriptions',
+      description: 'Verify all 16 regional health scheme claims with finance and welfare committee.',
+      priority: 'Urgent',
+      status: 'PENDING',
+      dueDate: 'Oct 22, 2026',
+      assigneeId: 'u4',
+      assigneeName: 'Miss Gloria',
+      creatorId: 'u1',
+      creatorName: 'Ekow Eshun',
+      category: 'Welfare',
+      createdAt: '2026-10-12',
+      commentsCount: 1,
+      isMyTask: false
+    },
+    {
+      id: 't3',
+      title: 'Organize NSSP Orientation Manuals',
+      description: 'Prepare orientation packages for incoming National Service Personnel.',
+      priority: 'Medium',
+      status: 'IN_PROGRESS',
+      dueDate: 'Oct 18, 2026',
+      assigneeId: 'u4',
+      assigneeName: 'Miss Gloria',
+      creatorId: 'u4',
+      creatorName: 'Miss Gloria',
+      category: 'Onboarding',
+      createdAt: '2026-10-11',
+      commentsCount: 0,
+      isMyTask: true
+    },
+    {
+      id: 't4',
+      title: 'Submit PSC Promotion Candidate Dossiers',
+      description: 'Compile evaluation sheets for Public Services Commission interviews.',
+      priority: 'High',
+      status: 'IN_PROGRESS',
+      dueDate: 'Oct 25, 2026',
+      assigneeId: 'u2',
+      assigneeName: 'Akosua Frimpong',
+      creatorId: 'u1',
+      creatorName: 'Ekow Eshun',
+      category: 'Promotions',
+      createdAt: '2026-10-09',
+      commentsCount: 3,
+      isMyTask: false
+    }
+  ],
+  meetings: [
+    {
+      id: 'm1',
+      title: 'Departmental Review & Operations Briefing',
+      description: 'Quarterly review of regional HR performance indicators and NSSP postings.',
+      date: new Date().toISOString().split('T')[0],
+      dayLabel: 'TODAY',
+      startTime: '10:00',
+      endTime: '11:30',
+      location: 'Executive Conference Room 1',
+      colorBar: '#8b5cf6',
+      participants: ['Ekow Eshun', 'Miss Gloria', 'Akosua Frimpong'],
+      status: 'UPCOMING'
+    },
+    {
+      id: 'm2',
+      title: 'NSSP Deployment & Regional Secretariat Briefing',
+      description: 'Orientation alignment for district youth officers and YLSTI facilitators.',
+      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+      dayLabel: 'TOMORROW',
+      startTime: '14:00',
+      endTime: '15:30',
+      location: 'Main Boardroom (Accra Head Office)',
+      colorBar: '#10b981',
+      participants: ['Ekow Eshun', 'Kwabena Osei', 'Miss Gloria'],
+      status: 'UPCOMING'
+    }
+  ],
+  notifications: [
+    {
+      id: 'n1',
+      userId: 'u4',
+      type: 'TASK_ASSIGNED',
+      title: 'New Assigned Task',
+      message: 'Ekow Eshun assigned task: Audit Regional Welfare Health Subscriptions',
+      relatedEntityId: 't2',
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      read: false,
+      actionUrl: '/tasks'
+    },
+    {
+      id: 'n2',
+      userId: 'u4',
+      type: 'MESSAGE',
+      title: 'New Message from Ekow Eshun',
+      message: 'Please ensure all regional health scheme claims are reconciled before Friday.',
+      relatedEntityId: 'conv3',
+      createdAt: new Date(Date.now() - 7200000).toISOString(),
+      read: false,
+      actionUrl: '/messages'
+    },
+    {
+      id: 'n3',
+      userId: 'u1',
+      type: 'ANNOUNCEMENT',
+      title: 'Official Circular Published',
+      message: 'Submission of Annual PSC Staff Performance Appraisals',
+      relatedEntityId: 'ann1',
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      read: true,
+      actionUrl: '/announcements'
+    }
+  ],
   conversations: [
     {
       id: 'conv1',
       name: 'Akosua Frimpong',
       isGroup: false,
       participantIds: ['u1', 'u2'],
-      participantNames: ['Christian Aboagye', 'Akosua Frimpong'],
+      participantNames: ['Ekow Eshun', 'Akosua Frimpong'],
       lastMessage: 'The promotion interview schedules from Public Services Commission have arrived.',
       lastMessageTime: '2 days ago',
       unreadCount: 1,
@@ -359,7 +488,7 @@ const defaultSeedData: AppDatabase = {
       name: 'Kwabena Osei',
       isGroup: false,
       participantIds: ['u1', 'u3'],
-      participantNames: ['Christian Aboagye', 'Kwabena Osei'],
+      participantNames: ['Ekow Eshun', 'Kwabena Osei'],
       lastMessage: 'All district youth officer postings for Ashanti region have been submitted for review.',
       lastMessageTime: '5 days ago',
       unreadCount: 1,
@@ -368,14 +497,14 @@ const defaultSeedData: AppDatabase = {
     },
     {
       id: 'conv3',
-      name: 'Abena Oforiwaa',
+      name: 'Miss Gloria',
       isGroup: false,
       participantIds: ['u1', 'u4'],
-      participantNames: ['Christian Aboagye', 'Abena Oforiwaa'],
+      participantNames: ['Ekow Eshun', 'Miss Gloria'],
       lastMessage: 'NSSP orientation materials are fully printed and ready for distribution.',
       lastMessageTime: '1 hour ago',
       unreadCount: 0,
-      avatarText: 'AO',
+      avatarText: 'MG',
       avatarBg: '#ec4899'
     },
     {
@@ -383,7 +512,7 @@ const defaultSeedData: AppDatabase = {
       name: 'Kofi Boateng',
       isGroup: false,
       participantIds: ['u1', 'u5'],
-      participantNames: ['Christian Aboagye', 'Kofi Boateng'],
+      participantNames: ['Ekow Eshun', 'Kofi Boateng'],
       lastMessage: 'Afienya center instructors have completed their COTVET skill evaluations.',
       lastMessageTime: 'Yesterday',
       unreadCount: 0,
@@ -395,7 +524,7 @@ const defaultSeedData: AppDatabase = {
       name: 'Hajia Amina Fuseini',
       isGroup: false,
       participantIds: ['u1', 'u6'],
-      participantNames: ['Christian Aboagye', 'Hajia Amina Fuseini'],
+      participantNames: ['Ekow Eshun', 'Hajia Amina Fuseini'],
       lastMessage: 'The legal review of our updated Scheme of Service is complete.',
       lastMessageTime: '3 days ago',
       unreadCount: 0,
@@ -407,12 +536,12 @@ const defaultSeedData: AppDatabase = {
       name: 'NYA HR Directorate Executive Team',
       isGroup: true,
       participantIds: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7'],
-      participantNames: ['Christian Aboagye', 'Akosua Frimpong', 'Kwabena Osei', 'Abena Oforiwaa', 'Kofi Boateng', 'Hajia Amina Fuseini', 'Dr. Emmanuel Mensah'],
+      participantNames: ['Ekow Eshun', 'Akosua Frimpong', 'Kwabena Osei', 'Miss Gloria', 'Kofi Boateng', 'Hajia Amina Fuseini', 'Dr. Emmanuel Mensah'],
       lastMessage: 'All regional deployment schedules are approved. Review commences Friday.',
       lastMessageTime: '4 hours ago',
       unreadCount: 0,
       avatarText: 'NYA',
-      avatarBg: '#ea580c'
+      avatarBg: '#006b3f'
     }
   ],
   messages: [
@@ -423,7 +552,7 @@ const defaultSeedData: AppDatabase = {
       senderName: 'Akosua Frimpong',
       senderInitials: 'AF',
       senderBg: '#0ea5e9',
-      text: 'Good morning Christian, the Public Services Commission has confirmed the promotion interview dates for our Senior Youth Officers. All candidate dossiers are indexed in the repository.',
+      text: 'Good morning Ekow, the Public Services Commission has confirmed the promotion interview dates for our Senior Youth Officers. All candidate dossiers are indexed in the repository.',
       timestamp: '2024-05-14T10:15:00Z',
       timeAgo: '2 days ago',
       unread: true
@@ -444,10 +573,10 @@ const defaultSeedData: AppDatabase = {
       id: 'msg3',
       conversationId: 'conv3',
       senderId: 'u4',
-      senderName: 'Abena Oforiwaa',
-      senderInitials: 'AO',
+      senderName: 'Miss Gloria',
+      senderInitials: 'MG',
       senderBg: '#ec4899',
-      text: 'Hello Christian, the welfare allowance calculations for Q2 have been finalized per the latest civil service circular.',
+      text: 'Hello Ekow, the welfare allowance calculations for Q2 have been finalized per the latest civil service circular.',
       timestamp: '2024-05-16T08:00:00Z',
       timeAgo: '2 hours ago',
       unread: false
@@ -456,10 +585,10 @@ const defaultSeedData: AppDatabase = {
       id: 'msg4',
       conversationId: 'conv3',
       senderId: 'u1',
-      senderName: 'Christian Aboagye',
-      senderInitials: 'CA',
-      senderBg: '#ea580c',
-      text: 'Thank you Abena. Please ensure all regional health scheme claims are reconciled before Friday.',
+      senderName: 'Ekow Eshun',
+      senderInitials: 'EE',
+      senderBg: '#006b3f',
+      text: 'Thank you Gloria. Please ensure all regional health scheme claims are reconciled before Friday.',
       timestamp: '2024-05-16T08:20:00Z',
       timeAgo: '1 hour ago',
       unread: false
@@ -513,7 +642,7 @@ const defaultSeedData: AppDatabase = {
       folder: 'National Service Personnel',
       fileSize: '1.2 MB',
       fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      uploadedBy: 'Abena Oforiwaa',
+      uploadedBy: 'Miss Gloria',
       uploadedAt: '2024-05-18',
       version: 'v1.4',
       accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER'],
@@ -555,7 +684,7 @@ const defaultSeedData: AppDatabase = {
       folder: 'Staff Welfare & Healthcare',
       fileSize: '1.6 MB',
       fileType: 'application/pdf',
-      uploadedBy: 'Abena Oforiwaa',
+      uploadedBy: 'Miss Gloria',
       uploadedAt: '2024-03-25',
       version: 'v2.2',
       accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER'],
@@ -570,7 +699,7 @@ const defaultSeedData: AppDatabase = {
       content: 'All Regional Directors, District Youth Coordinators, and Unit Heads must submit completed staff performance evaluation forms for the 2025/2026 assessment year to the HR Directorate by May 31.',
       category: 'Policy Update',
       priority: 'High',
-      authorName: 'Christian Aboagye',
+      authorName: 'Ekow Eshun',
       authorRole: 'Head of HR & Operations',
       publishedAt: '2024-05-15',
       expiryDate: '2024-05-31',
@@ -584,7 +713,7 @@ const defaultSeedData: AppDatabase = {
       content: 'Official postings of newly assigned National Service Personnel to the Accra Head Office, Regional Secretariats, and YLSTI Vocational Training Institutes have been finalized and uploaded to the Document Repository.',
       category: 'General',
       priority: 'Medium',
-      authorName: 'Abena Oforiwaa',
+      authorName: 'Miss Gloria',
       authorRole: 'Senior Personnel Officer',
       publishedAt: '2024-05-12',
       expiryDate: '2024-06-30',
@@ -609,7 +738,7 @@ const defaultSeedData: AppDatabase = {
   auditLogs: [
     {
       id: 'log1',
-      actor: 'Christian Aboagye',
+      actor: 'Ekow Eshun',
       action: 'LOGIN',
       target: 'HR Central Session',
       timestamp: '2024-05-18T08:14:22Z',
@@ -629,7 +758,7 @@ const defaultSeedData: AppDatabase = {
     },
     {
       id: 'log3',
-      actor: 'Christian Aboagye',
+      actor: 'Ekow Eshun',
       action: 'CASE_STATUS_CHANGE',
       target: 'Case NYA-HR-2024-082',
       timestamp: '2024-05-18T09:12:00Z',
@@ -725,12 +854,47 @@ class StorageManager {
     });
   }
 
+  private migrateLegacyNames(db: AppDatabase): AppDatabase {
+    const raw = JSON.stringify(db);
+    const migrated = raw
+      .replace(/Christian Aboagye/g, 'Ekow Eshun')
+      .replace(/christian\.aboagye/g, 'ekow.eshun')
+      .replace(/Abena Oforiwaa/g, 'Miss Gloria')
+      .replace(/a\.oforiwaa/g, 'miss.gloria')
+      .replace(/Good morning Christian/g, 'Good morning Ekow')
+      .replace(/Hello Christian/g, 'Hello Ekow')
+      .replace(/Thank you Abena/g, 'Thank you Gloria');
+
+    const result = JSON.parse(migrated) as AppDatabase;
+
+    if (result.users) {
+      result.users.forEach(u => {
+        if (u.id === 'u1') {
+          u.name = 'Ekow Eshun';
+          u.email = 'ekow.eshun@nya.gov.gh';
+          u.username = 'ekow.eshun';
+          u.avatarText = 'EE';
+          u.avatarBg = '#006b3f';
+        }
+        if (u.id === 'u4') {
+          u.name = 'Miss Gloria';
+          u.email = 'miss.gloria@nya.gov.gh';
+          u.username = 'miss.gloria';
+          u.avatarText = 'MG';
+        }
+      });
+    }
+
+    return result;
+  }
+
   private loadDatabase(): AppDatabase {
     try {
       if (fs.existsSync(DB_FILE)) {
         const content = fs.readFileSync(DB_FILE, 'utf-8');
-        const parsed = JSON.parse(content) as AppDatabase;
+        let parsed = JSON.parse(content) as AppDatabase;
         if (parsed.users && Array.isArray(parsed.users)) {
+          parsed = this.migrateLegacyNames(parsed);
           parsed.users = this.ensureUsersIntegrity(parsed.users);
           if (!parsed.resetTickets) parsed.resetTickets = [];
           this.saveDatabase(parsed);
@@ -740,7 +904,8 @@ class StorageManager {
     } catch (err) {
       console.error('Failed to load database file, creating fresh database with seeds:', err);
     }
-    const fresh = JSON.parse(JSON.stringify(defaultSeedData));
+    let fresh = JSON.parse(JSON.stringify(defaultSeedData));
+    fresh = this.migrateLegacyNames(fresh);
     fresh.users = this.ensureUsersIntegrity(fresh.users);
     fresh.resetTickets = [];
     this.saveDatabase(fresh);
@@ -782,11 +947,68 @@ class StorageManager {
     this.saveDatabase(this.db);
   }
 
+  // Notifications
+  public getNotifications(userId: string): NotificationItem[] {
+    if (!this.db.notifications) this.db.notifications = [];
+    return this.db.notifications
+      .filter(n => n.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  public createNotification(data: Omit<NotificationItem, 'id' | 'createdAt' | 'read'>): NotificationItem {
+    if (!this.db.notifications) this.db.notifications = [];
+    const notif: NotificationItem = {
+      ...data,
+      id: 'notif_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+    this.db.notifications.unshift(notif);
+    this.saveDatabase(this.db);
+    return notif;
+  }
+
+  public markNotificationRead(id: string, userId: string): boolean {
+    if (!this.db.notifications) return false;
+    const n = this.db.notifications.find(item => item.id === id && item.userId === userId);
+    if (!n) return false;
+    n.read = true;
+    n.readAt = new Date().toISOString();
+    this.saveDatabase(this.db);
+    return true;
+  }
+
+  public markAllNotificationsRead(userId: string): boolean {
+    if (!this.db.notifications) return false;
+    let updated = false;
+    const now = new Date().toISOString();
+    this.db.notifications.forEach(n => {
+      if (n.userId === userId && !n.read) {
+        n.read = true;
+        n.readAt = now;
+        updated = true;
+      }
+    });
+    if (updated) this.saveDatabase(this.db);
+    return updated;
+  }
+
   // Dashboard Aggregates calculated directly from real database items for Ghana Youth Authority
   public getDashboardData(currentUserId = 'u1'): DashboardData {
+    const user = this.db.users.find(u => u.id === currentUserId);
+    const isHrHead = user?.role === 'HR_ADMIN';
+
     const pendingCases = this.db.cases.filter(c => c.status === 'PENDING_ACCEPTANCE');
-    const myTasks = this.db.tasks.filter(t => t.assigneeId === currentUserId);
-    const tasksAssignedToOthers = this.db.tasks.filter(t => t.creatorId === currentUserId && t.assigneeId !== currentUserId);
+    
+    // My Personal Tasks: assigned to me AND created by me (or marked isMyTask)
+    const myTasks = this.db.tasks.filter(t => t.assigneeId === currentUserId && (t.creatorId === currentUserId || t.isMyTask));
+    
+    // Assigned Tasks:
+    // For ordinary staff: tasks assigned to them by HR Head/others (creatorId !== currentUserId)
+    // For HR Head: tasks created by HR Head and assigned to others
+    const tasksAssignedToOthers = isHrHead
+      ? this.db.tasks.filter(t => t.creatorId === currentUserId && t.assigneeId !== currentUserId)
+      : this.db.tasks.filter(t => t.assigneeId === currentUserId && t.creatorId !== currentUserId);
 
     const categories = [
       { type: 'Postings & Deployment', color: '#f97316' },
@@ -821,7 +1043,7 @@ class StorageManager {
         newCasesCount: this.db.cases.length,
         newCasesTrend: `+${pendingCases.length} pending`,
         newCasesTrendPositive: true,
-        newTasksCount: this.db.tasks.length,
+        newTasksCount: myTasks.length + tasksAssignedToOthers.length,
         newTasksTrend: `${myTasks.filter(t => t.status !== 'COMPLETED').length} active`,
         newTasksTrendPositive: myTasks.filter(t => t.status !== 'COMPLETED').length > 0,
         totalOpenCases: this.db.cases.length,
@@ -870,8 +1092,11 @@ class StorageManager {
   }
 
   // Tasks
-  public getTasks(): Task[] {
-    return this.db.tasks;
+  public getTasks(userId?: string, userRole?: string): Task[] {
+    if (!userId || userRole === 'HR_ADMIN') {
+      return this.db.tasks;
+    }
+    return this.db.tasks.filter(t => t.assigneeId === userId || t.creatorId === userId);
   }
 
   public createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'commentsCount'>, actor: string): Task {
@@ -925,31 +1150,120 @@ class StorageManager {
   }
 
   // Messages & Conversations
-  public getConversations(): Conversation[] {
-    return this.db.conversations;
+  public getConversations(userId?: string): Conversation[] {
+    if (!userId) return this.db.conversations;
+
+    const userConvs = this.db.conversations.filter(c =>
+      c.participantIds && c.participantIds.includes(userId)
+    );
+
+    return userConvs.map(conv => {
+      let displayName = conv.name;
+      let avatarText = conv.avatarText;
+      let avatarBg = conv.avatarBg;
+
+      if (!conv.isGroup) {
+        const otherId = conv.participantIds.find(id => id !== userId);
+        const otherUser = this.db.users.find(u => u.id === otherId);
+        if (otherUser) {
+          displayName = otherUser.name;
+          avatarText = otherUser.avatarText;
+          avatarBg = otherUser.avatarBg;
+        }
+      }
+
+      const unreadCount = this.db.messages.filter(m =>
+        m.conversationId === conv.id &&
+        m.senderId !== userId &&
+        (!m.readBy || !m.readBy.includes(userId)) &&
+        m.unread !== false
+      ).length;
+
+      return {
+        ...conv,
+        name: displayName,
+        avatarText,
+        avatarBg,
+        unreadCount
+      };
+    });
   }
 
-  public getMessages(conversationId?: string): Message[] {
+  public getConversationById(id: string): Conversation | null {
+    return this.db.conversations.find(c => c.id === id) || null;
+  }
+
+  public getMessages(conversationId?: string, userId?: string): Message[] {
     if (conversationId) {
+      if (userId) {
+        const conv = this.getConversationById(conversationId);
+        if (conv && conv.participantIds && !conv.participantIds.includes(userId)) {
+          return [];
+        }
+      }
       return this.db.messages.filter(m => m.conversationId === conversationId);
     }
     return this.db.messages;
   }
 
-  public sendMessage(conversationId: string, senderId: string, text: string, attachmentName?: string, replyTo?: Message['replyTo']): Message {
+  public getMessageById(id: string): Message | null {
+    return this.db.messages.find(m => m.id === id) || null;
+  }
+
+  public markConversationAsRead(conversationId: string, userId: string): boolean {
+    const conv = this.getConversationById(conversationId);
+    if (!conv) return false;
+    if (conv.participantIds && !conv.participantIds.includes(userId)) return false;
+
+    let modified = false;
+    for (const msg of this.db.messages) {
+      if (msg.conversationId === conversationId && msg.senderId !== userId) {
+        if (!msg.readBy) msg.readBy = [];
+        if (!msg.readBy.includes(userId)) {
+          msg.readBy.push(userId);
+          modified = true;
+        }
+        if (msg.unread) {
+          msg.unread = false;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      this.saveDatabase(this.db);
+    }
+    return true;
+  }
+
+  public sendMessage(
+    conversationId: string,
+    senderId: string,
+    text: string,
+    attachmentName?: string,
+    attachmentPath?: string,
+    attachmentSize?: string,
+    attachmentMime?: string,
+    replyTo?: Message['replyTo']
+  ): Message {
     const sender = this.db.users.find(u => u.id === senderId) || this.db.users[0];
+    const msgText = (text && text.trim()) ? text.trim() : (attachmentName ? `📎 Attached: ${attachmentName}` : 'Sent a message');
     const newMsg: Message = {
-      id: 'msg_' + Date.now(),
+      id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       conversationId,
       senderId: sender.id,
       senderName: sender.name,
       senderInitials: sender.avatarText,
       senderBg: sender.avatarBg,
-      text,
+      text: msgText,
       timestamp: new Date().toISOString(),
       timeAgo: 'Just now',
       unread: true,
+      readBy: [sender.id],
       attachmentName,
+      attachmentPath,
+      attachmentSize,
+      attachmentMime,
       replyTo
     };
     this.db.messages.push(newMsg);
@@ -957,7 +1271,7 @@ class StorageManager {
     // Update conversation last message
     const convIdx = this.db.conversations.findIndex(c => c.id === conversationId);
     if (convIdx !== -1) {
-      this.db.conversations[convIdx].lastMessage = text;
+      this.db.conversations[convIdx].lastMessage = msgText;
       this.db.conversations[convIdx].lastMessageTime = 'Just now';
     }
 
@@ -1022,6 +1336,19 @@ class StorageManager {
   }
 
   public createConversation(name: string, isGroup: boolean, participantIds: string[], actor: string): Conversation {
+    if (!isGroup && participantIds.length === 2) {
+      const existing = this.db.conversations.find(c =>
+        !c.isGroup &&
+        c.participantIds &&
+        c.participantIds.length === 2 &&
+        c.participantIds.includes(participantIds[0]) &&
+        c.participantIds.includes(participantIds[1])
+      );
+      if (existing) {
+        return existing;
+      }
+    }
+
     const participants = this.db.users.filter(u => participantIds.includes(u.id));
     const newConv: Conversation = {
       id: 'conv_' + Date.now(),
@@ -1033,7 +1360,7 @@ class StorageManager {
       lastMessageTime: 'Just now',
       unreadCount: 0,
       avatarText: isGroup ? 'GP' : (participants[0]?.avatarText || 'DM'),
-      avatarBg: isGroup ? '#6366f1' : (participants[0]?.avatarBg || '#ea580c')
+      avatarBg: isGroup ? '#6366f1' : (participants[0]?.avatarBg || '#006b3f')
     };
     this.db.conversations.unshift(newConv);
     this.saveDatabase(this.db);

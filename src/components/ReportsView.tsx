@@ -37,14 +37,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 select-none text-black">
       {/* Top action header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-liquid-tile p-4.5 rounded-2xl border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
         <div>
-          <h2 className="text-base font-bold text-slate-800">
+          <h2 className="text-base font-bold text-black tracking-wide">
             Operational Reporting & Security Audit
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-black mt-0.5">
             Export compliant summaries, track departmental HR workflow velocity, and review LAN audit trails
           </p>
         </div>
@@ -52,7 +52,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
           <button
             onClick={onExportCsv}
-            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer"
             title="Export staff records to CSV"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -62,7 +62,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {onExportAuditCsv && (
             <button
               onClick={onExportAuditCsv}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 glass-btn-secondary rounded-xl text-xs font-bold transition cursor-pointer"
               title="Export audit trail to CSV"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -73,10 +73,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {onExportTasksCsv && (
             <button
               onClick={onExportTasksCsv}
-              className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 glass-btn-secondary hover:border-[#7738FF] rounded-xl text-xs font-bold transition cursor-pointer"
               title="Export tasks to CSV"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 stroke-[2.5]" />
+              <FileSpreadsheet className="w-3.5 h-3.5 stroke-[2.5] text-[#7738FF]" />
               <span>Tasks CSV</span>
             </button>
           )}
@@ -84,13 +84,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl text-xs w-fit">
+      <div className="flex items-center gap-2 p-1 glass-liquid-pill rounded-xl text-xs w-fit">
         <button
           onClick={() => setActiveTab('METRICS')}
           className={`px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
             activeTab === 'METRICS'
-              ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'glass-liquid-nav-active font-bold'
+              : 'text-black hover:text-black'
           }`}
         >
           HR Operations & Task Metrics
@@ -99,8 +99,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           onClick={() => setActiveTab('AUDIT')}
           className={`px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
             activeTab === 'AUDIT'
-              ? 'bg-white text-slate-900 shadow-2xs border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'glass-liquid-nav-active font-bold'
+              : 'text-black hover:text-black'
           }`}
         >
           Security Audit Logs ({auditLogs.length})
@@ -111,85 +111,85 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="space-y-4">
           {/* Summary KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs font-semibold text-slate-600">
-                Personnel requests
+            <div className="glass-liquid-tile glass-card-hover p-4 rounded-2xl border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+              <div className="text-xs font-semibold text-black">
+                Personnel Requests
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">
+              <div className="text-2xl font-bold text-black mt-1 tabular-nums tracking-tight">
                 {cases.length}
               </div>
-              <div className="text-[10px] text-emerald-600 font-semibold mt-1">
+              <div className="text-[10px] text-emerald-400 font-semibold mt-1">
                 +14.88% this month
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs font-semibold text-slate-600">
-                Pending review
+            <div className="glass-liquid-tile glass-card-hover p-4 rounded-2xl border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+              <div className="text-xs font-semibold text-black">
+                Pending Review
               </div>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1 tabular-nums">
+              <div className="text-2xl font-bold text-amber-300 mt-1 tabular-nums tracking-tight">
                 {cases.filter(c => c.status === 'PENDING_ACCEPTANCE').length}
               </div>
-              <div className="text-[10px] text-slate-400 mt-1">
+              <div className="text-[10px] text-black mt-1">
                 Requires action
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs font-semibold text-slate-600">
-                In progress
+            <div className="glass-liquid-tile glass-card-hover p-4 rounded-2xl border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+              <div className="text-xs font-semibold text-black">
+                In Progress
               </div>
-              <div className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">
+              <div className="text-2xl font-bold text-[#7738FF] mt-1 tabular-nums tracking-tight">
                 {cases.filter(c => c.status === 'IN_PROGRESS').length}
               </div>
-              <div className="text-[10px] text-slate-400 mt-1">
+              <div className="text-[10px] text-black mt-1">
                 Under active review
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs font-semibold text-slate-600">
-                Avg. resolution time
+            <div className="glass-liquid-tile glass-card-hover p-4 rounded-2xl border border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.25)]">
+              <div className="text-xs font-semibold text-black">
+                Avg. Resolution Time
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">
+              <div className="text-2xl font-bold text-sky-400 mt-1 tabular-nums tracking-tight">
                 4.2 Days
               </div>
-              <div className="text-[10px] text-emerald-600 font-semibold mt-1">
+              <div className="text-[10px] text-emerald-400 font-semibold mt-1">
                 98.4% SLA adherence
               </div>
             </div>
           </div>
 
           {/* Regional workload table */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-            <h3 className="text-xs font-bold text-slate-800 mb-3">
-              Regional youth secretariats workflow
+          <div className="glass-liquid-tile p-5 rounded-2xl border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider mb-3">
+              Regional Youth Secretariats Workflow
             </h3>
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="text-slate-400 text-[11px] border-b border-slate-100">
+                <tr className="text-black text-[11px] border-b border-slate-200/80">
                   <th className="pb-2 font-normal">Region</th>
                   <th className="pb-2 font-normal">Active Requests</th>
                   <th className="pb-2 font-normal">Monthly Trend</th>
                   <th className="pb-2 font-normal text-right pr-2">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-200/60">
                 {dashboardData.countryBreakdown.map((row) => (
-                  <tr key={row.country} className="hover:bg-slate-50 transition">
-                    <td className="py-3 font-semibold text-slate-800">
+                  <tr key={row.country} className="hover:bg-white/[0.035] transition">
+                    <td className="py-3 font-semibold text-black">
                       {row.country}
                     </td>
-                    <td className="py-3 text-slate-900 font-bold tabular-nums">
+                    <td className="py-3 text-black font-bold tabular-nums font-mono">
                       {row.activeCases}
                     </td>
-                    <td className="py-3 font-semibold text-xs tabular-nums">
-                      <span className={row.trendPositive ? 'text-emerald-600' : 'text-red-500'}>
+                    <td className="py-3 font-semibold text-xs tabular-nums font-mono">
+                      <span className={row.trendPositive ? 'text-emerald-400' : 'text-rose-400'}>
                         {row.trend}
                       </span>
                     </td>
                     <td className="py-3 text-right pr-2">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                         Operational
                       </span>
                     </td>
@@ -201,17 +201,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
       ) : (
         /* Audit Log Stream */
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+        <div className="glass-liquid-tile p-5 rounded-2xl border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)] space-y-3">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 text-xs">
               {['ALL', 'SUCCESS', 'WARNING', 'FAILED'].map((st) => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg font-medium transition cursor-pointer border ${
                     statusFilter === st
-                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                      ? 'bg-[#7738FF] text-black font-bold shadow-xs border-[#7738FF]'
+                      : 'glass-liquid-pill text-black hover:text-black'
                   }`}
                 >
                   {st}
@@ -220,13 +220,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
 
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
               <input
                 type="text"
                 value={auditSearch}
                 onChange={(e) => setAuditSearch(e.target.value)}
                 placeholder="Search audit trail..."
-                className="pl-8 pr-4 py-1.5 bg-slate-50 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 w-full sm:w-64"
+                className="pl-8 pr-4 py-1.5 bg-white/80 text-black hover:bg-white/[0.07] focus:bg-white/[0.09] text-black placeholder-[#A6B0C8]/50 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-full sm:w-64 transition shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]"
               />
             </div>
           </div>
@@ -234,7 +234,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="text-slate-400 text-[11px] border-b border-slate-100">
+                <tr className="text-black text-[11px] border-b border-slate-200/80">
                   <th className="pb-2.5 font-normal">Timestamp</th>
                   <th className="pb-2.5 font-normal">Actor</th>
                   <th className="pb-2.5 font-normal">Action</th>
@@ -243,32 +243,32 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                   <th className="pb-2.5 font-normal text-right pr-2">Outcome</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-200/60">
                 {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition">
-                    <td className="py-2.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                  <tr key={log.id} className="hover:bg-white/[0.035] transition">
+                    <td className="py-2.5 font-mono text-[11px] text-[#7738FF] whitespace-nowrap">
                       {log.timestamp.replace('T', ' ').slice(0, 19)}
                     </td>
-                    <td className="py-2.5 font-bold text-slate-800">
+                    <td className="py-2.5 font-bold text-black">
                       {log.actor}
                     </td>
-                    <td className="py-2.5 font-semibold text-slate-700">
+                    <td className="py-2.5 font-semibold text-black">
                       {log.action}
                     </td>
-                    <td className="py-2.5 text-slate-600 truncate max-w-[200px]" title={log.target}>
+                    <td className="py-2.5 text-black truncate max-w-[200px]" title={log.target}>
                       {log.target}
                     </td>
-                    <td className="py-2.5 font-mono text-[11px] text-slate-400">
+                    <td className="py-2.5 font-mono text-[11px] text-black">
                       {log.ipAddress}
                     </td>
                     <td className="py-2.5 text-right pr-2">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           log.status === 'SUCCESS'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                             : log.status === 'WARNING'
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                            : 'bg-red-50 text-red-600 border border-red-200'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                         }`}
                       >
                         {log.status}
@@ -280,7 +280,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </table>
 
             {filteredLogs.length === 0 && (
-              <div className="text-center py-8 text-xs text-slate-400">
+              <div className="text-center py-8 text-xs text-black">
                 No audit events matching criteria.
               </div>
             )}

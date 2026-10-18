@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient: Clean Light Sky Blue & Azure -->
+    <linearGradient id="sky-glass-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="35%" stop-color="#DBEAFE" />
+      <stop offset="70%" stop-color="#93C5FD" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <!-- Glass Panel Base Gradients -->
+    <linearGradient id="glass-panel-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#E0F2FE" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#BAE6FD" stop-opacity="0.30" />
+    </linearGradient>
+
+    <linearGradient id="glass-panel-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#93C5FD" stop-opacity="0.75" />
+      <stop offset="60%" stop-color="#60A5FA" stop-opacity="0.60" />
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0.80" />
+    </linearGradient>
+
+    <!-- Edge Highlight & Refraction Gradients -->
+    <linearGradient id="edge-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#38BDF8" stop-opacity="0.80" />
+      <stop offset="100%" stop-color="#60A5FA" stop-opacity="0.20" />
+    </linearGradient>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE" />
+      <stop offset="50%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+
+    <!-- Light Beam Flare Filter -->
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="35" />
+    </filter>
+    <filter id="intense-glint" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="drop-shadow-glass" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="15" dy="30" stdDeviation="25" flood-color="#1E3A8A" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Base Canvas -->
+  <rect width="100%" height="100%" fill="url(#sky-glass-bg)" />
+
+  <!-- Diagonal Soft Light Rays Slicing Top-Left to Bottom-Right -->
+  <polygon points="0,0 800,0 1920,800 1920,1080 1200,1080 0,200" fill="#FFFFFF" opacity="0.28" filter="url(#soft-glow)" />
+  <polygon points="200,0 600,0 1920,600 1920,800" fill="#E0F2FE" opacity="0.35" filter="url(#soft-glow)" />
+
+  <!-- Background Ambient Refraction Glows -->
+  <circle cx="1000" cy="540" r="450" fill="#FFFFFF" opacity="0.45" filter="url(#soft-glow)" />
+  <circle cx="1400" cy="200" r="350" fill="#38BDF8" opacity="0.25" filter="url(#soft-glow)" />
+  <circle cx="400" cy="900" r="500" fill="#1D4ED8" opacity="0.30" filter="url(#soft-glow)" />
+
+  <!-- 3D FLOATING GLASS TILES ARCHITECTURE (Matching 3RD BACKGROUND.jpg) -->
+
+  <!-- 1. TOP CENTER LARGE FLOATING GLASS PLATE (Slightly Angled) -->
+  <g filter="url(#drop-shadow-glass)">
+    <path d="M 450, -80 L 1700, -80 C 1800, -80 1850, 20 1820, 100 L 1500, 380 C 1450, 420 1380, 420 1280, 420 L 500, 180 C 420, 150 400, 30 450, -80 Z" 
+          fill="url(#glass-panel-1)" stroke="url(#edge-highlight)" stroke-width="4" />
+    <!-- Bright Top Rim Luminous Line -->
+    <path d="M 500, 180 L 1280, 420" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.9" />
+  </g>
+
+  <!-- 2. MIDDLE RIGHT PROMINENT GLASS TILE WITH INTENSE EDGE GLINT -->
+  <g filter="url(#drop-shadow-glass)">
+    <path d="M 1150, 220 L 2050, 220 L 2050, 850 C 2050, 920 1980, 980 1900, 960 L 1220, 820 C 1130, 800 1080, 720 1100, 630 L 1150, 220 Z" 
+          fill="url(#glass-panel-1)" stroke="url(#edge-highlight)" stroke-width="5" />
+    
+    <!-- Luminous Edge Rim (Cyan-White Glowing Contour) -->
+    <path d="M 1100, 630 C 1080, 720 1130, 800 1220, 820 L 1900, 960" 
+          stroke="#7DD3FC" stroke-width="8" fill="none" opacity="0.95" />
+    <path d="M 1100, 630 C 1080, 720 1130, 800 1220, 820 L 1900, 960" 
+          stroke="#FFFFFF" stroke-width="3" fill="none" opacity="1" />
+
+    <!-- Intense Specular Flare Glint at Vertex Corner -->
+    <circle cx="1160" cy="740" r="40" fill="#FFFFFF" opacity="0.8" filter="url(#intense-glint)" />
+    <circle cx="1160" cy="740" r="15" fill="#E0F2FE" />
+  </g>
+
+  <!-- 3. BOTTOM LEFT DEEP BLUE / CYAN 3D GLASS BLOCK -->
+  <g filter="url(#drop-shadow-glass)">
+    <path d="M -100, 520 L 480, 630 C 560, 645 610, 720 580, 800 L 280, 1180 L -100, 1180 Z" 
+          fill="url(#glass-panel-2)" stroke="url(#edge-highlight)" stroke-width="4" />
+
+    <!-- Glowing Rim Contour on Top Left Glass Block -->
+    <path d="M -100, 520 L 480, 630 C 560, 645 610, 720 580, 800" 
+          stroke="#93C5FD" stroke-width="7" fill="none" opacity="0.9" />
+    <path d="M -100, 520 L 480, 630 C 560, 645 610, 720 580, 800" 
+          stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.95" />
+  </g>
+
+  <!-- 4. BOTTOM CENTER-RIGHT FLOATING GLASS PLATE -->
+  <g filter="url(#drop-shadow-glass)">
+    <path d="M 320, 720 L 1800, 1020 L 1800, 1200 L 150, 1200 C 220, 1050 250, 880 320, 720 Z" 
+          fill="url(#glass-panel-1)" stroke="url(#edge-highlight)" stroke-width="4" />
+    <!-- Bright Top Specular Rim -->
+    <path d="M 320, 720 L 1800, 1020" stroke="#FFFFFF" stroke-width="6" opacity="0.85" />
+  </g>
+
+  <!-- Central Luminous Light Explosion / Flare Beam -->
+  <circle cx="560" cy="690" r="90" fill="#FFFFFF" filter="url(#intense-glint)" opacity="0.9" />
+  <circle cx="560" cy="690" r="220" fill="#E0F2FE" filter="url(#soft-glow)" opacity="0.6" />
+</svg>

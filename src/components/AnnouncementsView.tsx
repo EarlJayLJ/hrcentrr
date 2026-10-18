@@ -25,7 +25,6 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
   const categories = ['ALL', 'General', 'Policy Update', 'Emergency', 'Holiday', 'Benefits'];
 
   const filteredAnnouncements = announcements.filter((ann) => {
-    // If draft, only visible to admins/managers
     if (ann.isDraft && !canPublish) return false;
     if (selectedCategory !== 'ALL' && ann.category !== selectedCategory) return false;
     if (searchQuery && !ann.title.toLowerCase().includes(searchQuery.toLowerCase()) && !ann.content.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -35,14 +34,14 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 select-none text-black">
       {/* Top action header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-liquid-tile p-4.5 rounded-2xl border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
         <div>
-          <h2 className="text-base font-bold text-slate-800">
+          <h2 className="text-base font-bold text-black tracking-wide">
             Official Notices & Announcements
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-black mt-0.5">
             National Youth Authority official memos, directives, and departmental notices
           </p>
         </div>
@@ -50,7 +49,7 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
         {canPublish && (
           <button
             onClick={onNewAnnouncement}
-            className="flex items-center gap-2 px-4 py-2 bg-[#006b3f] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer self-start sm:self-auto"
+            className="flex items-center gap-2 px-4 py-2 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer self-start sm:self-auto"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Publish Notice</span>
@@ -65,10 +64,10 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition cursor-pointer border ${
                 selectedCategory === cat
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                  ? 'glass-liquid-nav-active font-bold'
+                  : 'glass-liquid-pill text-black hover:text-black'
               }`}
             >
               {cat}
@@ -77,13 +76,13 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search notices..."
-            className="pl-8 pr-4 py-1.5 bg-white text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 w-full sm:w-64"
+            className="pl-8 pr-4 py-1.5 bg-white/80 text-black hover:bg-white/[0.07] focus:bg-white/[0.09] text-black placeholder-[#A6B0C8]/50 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-full sm:w-64 transition shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]"
           />
         </div>
       </div>
@@ -95,23 +94,19 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
           return (
             <div
               key={ann.id}
-              className={`p-5 rounded-2xl border transition ${
-                ann.pinned
-                  ? 'bg-white border-2 border-emerald-400 shadow-xs'
-                  : 'bg-white border border-slate-200 shadow-xs'
-              }`}
+              className="glass-liquid-tile glass-card-hover p-5 rounded-2xl border border-white/80 shadow-[0_6px_24px_rgba(0,0,0,0.30)]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     {ann.pinned && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                        <Pin className="w-3 h-3 rotate-45" /> Pinned
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-[#7738FF] bg-[#7738FF]/20 px-2 py-0.5 rounded-full border border-[#7738FF]/40">
+                        <Pin className="w-3 h-3 rotate-45 text-[#7738FF]" /> Pinned
                       </span>
                     )}
 
                     {ann.isDraft && (
-                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/40">
                         Draft (Unpublished)
                       </span>
                     )}
@@ -119,40 +114,40 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         ann.priority === 'High' || ann.priority === 'Urgent'
-                          ? 'bg-red-100 text-red-700'
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                           : ann.priority === 'Medium'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                       }`}
                     >
                       {ann.priority} Priority
                     </span>
 
-                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-medium text-[#7738FF] bg-white/[0.06] border border-slate-200/80 px-2.5 py-0.5 rounded-full">
                       {ann.category}
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-900 pt-0.5">
+                  <h3 className="text-sm font-bold text-black pt-1">
                     {ann.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs text-black leading-relaxed whitespace-pre-wrap">
                     {ann.content}
                   </p>
 
-                  <div className="flex items-center gap-4 text-[10px] text-slate-400 pt-1 flex-wrap">
+                  <div className="flex items-center gap-4 text-[10px] text-black pt-1 flex-wrap">
                     <span>
-                      Published by: <strong className="text-slate-600">{ann.authorName}</strong> ({ann.authorRole})
+                      Published by: <strong className="text-black">{ann.authorName}</strong> ({ann.authorRole})
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
+                    <span className="flex items-center gap-1 font-mono">
+                      <Calendar className="w-3 h-3 text-[#7738FF]" />
                       {ann.publishedAt}
                     </span>
                     {ann.expiryDate && (
-                      <span>Expires: {ann.expiryDate}</span>
+                      <span className="font-mono">Expires: {ann.expiryDate}</span>
                     )}
-                    <span>{ann.acknowledgedBy.length} acknowledgements</span>
+                    <span className="text-[#7738FF] font-semibold">{ann.acknowledgedBy.length} acknowledgements</span>
                   </div>
                 </div>
 
@@ -161,20 +156,20 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
                   <button
                     onClick={() => onAcknowledge(ann.id)}
                     disabled={isAcknowledged}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
                       isAcknowledged
-                        ? 'bg-emerald-100 text-emerald-800 cursor-default'
-                        : 'bg-white hover:bg-emerald-50 border border-slate-200 text-slate-700 hover:text-emerald-800 shadow-2xs'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 cursor-default'
+                        : 'glass-btn-secondary hover:border-[#7738FF] text-black'
                     }`}
                   >
-                    <CheckCircle2 className={`w-3.5 h-3.5 ${isAcknowledged ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${isAcknowledged ? 'text-emerald-400' : 'text-[#7738FF]'}`} />
                     <span>{isAcknowledged ? 'Acknowledged' : 'Acknowledge'}</span>
                   </button>
 
                   {canPublish && onDeleteAnnouncement && (
                     <button
                       onClick={() => onDeleteAnnouncement(ann.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                      className="p-1.5 text-black hover:text-rose-400 hover:bg-rose-500/15 rounded-lg transition cursor-pointer"
                       title="Archive / Remove Notice"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -187,7 +182,7 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
         })}
 
         {filteredAnnouncements.length === 0 && (
-          <div className="text-center py-12 text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">
+          <div className="text-center py-12 text-xs text-black glass-liquid-tile rounded-2xl border border-slate-200/80">
             No notices found matching current criteria.
           </div>
         )}

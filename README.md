@@ -86,3 +86,9 @@ If client machines cannot connect:
 
 - **Export Backup**: Navigate to Administration and click "Download Full Database Backup" or issue a GET request to `/api/admin/backup`.
 - **Restore Backup**: Use the "Restore Backup JSON File" control in the Administration console to restore all tables, cases, and logs.
+
+## 6.Engineering and Setup
+
+**HRLink was developed and built by Skylark Corp,an organization which builds softwares, websites and webApps and also a major Cybersecurity Model.
+**Phone:0544639305
+**WhatsApp:0200421879

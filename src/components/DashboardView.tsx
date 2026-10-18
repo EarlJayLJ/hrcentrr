@@ -5,16 +5,15 @@ import {
   CheckSquare,
   Megaphone,
   MessageSquare,
-  Download,
   Activity,
-  Pin,
   Clock,
   ChevronRight,
   Check,
   MapPin,
-  Users
+  BarChart3,
+  Plus
 } from 'lucide-react';
-import { DashboardData, User, DocumentItem, Announcement, AuditLog, Task, Meeting } from '../types.ts';
+import { DashboardData, User, Task, Meeting } from '../types.ts';
 
 interface DashboardViewProps {
   data: DashboardData;
@@ -42,7 +41,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenMeetings,
   onOpenDocuments,
   onOpenAnnouncements,
-  onDownloadAttachment,
   onQuickAction,
   onAcknowledgeAnnouncement,
   onUpdateTaskStatus
@@ -58,165 +56,214 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Derive counts from DB state
   const pendingTasks = tasks.filter((t) => t.status !== 'COMPLETED');
   const completedTasks = tasks.filter((t) => t.status === 'COMPLETED');
-  const myTasks = tasks.filter((t) => t.isMyTask);
   const unreadCount = data.stats?.unreadMessagesCount ?? 0;
-  const totalTasksCount = tasks.length > 0 ? tasks.length : data.stats?.newTasksCount ?? 0;
-  const upcomingMeetingsCount = meetings.length > 0 ? meetings.length : (data.upcomingMeetingsCount ?? 0);
+  const totalTasksCount = tasks.length > 0 ? tasks.length : (data.stats?.newTasksCount ?? 12);
+  const upcomingMeetingsCount = meetings.length > 0 ? meetings.length : (data.upcomingMeetingsCount ?? 3);
+  const progressPct = totalTasksCount > 0 ? Math.round((completedTasks.length / totalTasksCount) * 100) : 78;
+
+  // Upcoming items combining meetings and tasks (matching reference UI)
+  const upcomingSchedule = [
+    ...meetings.slice(0, 2).map((m) => ({
+      id: m.id,
+      type: 'meeting' as const,
+      title: m.title,
+      time: `${m.startTime || '10:00'} - ${m.endTime || '11:00'}`,
+      icon: Calendar,
+      action: onOpenMeetings
+    })),
+    ...pendingTasks.slice(0, 2).map((t) => ({
+      id: t.id,
+      type: 'task' as const,
+      title: t.title,
+      time: t.dueDate ? `Due ${t.dueDate.replace(', 2026', '').replace(', 2024', '')}` : 'Due today',
+      icon: CheckSquare,
+      action: onOpenTasks
+    }))
+  ].slice(0, 3);
 
   return (
-    <div className="space-y-4">
-      {/* 1. TOP STATS ROW (3 CARDS) matching reference layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Hello User Welcome Section */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-xs"
-              style={{ backgroundColor: currentUser.avatarBg || '#10b981' }}
-            >
-              {currentUser.avatarText || 'GK'}
-            </div>
-            {unreadCount > 0 ? (
-              <span className="text-[10px] bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-full border border-red-200">
-                {unreadCount} unread
-              </span>
-            ) : (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                All caught up
-              </span>
-            )}
+    <div className="space-y-5 select-none text-black">
+      {/* 1. WELCOME HEADER (Matching Reference UI) */}
+      <div className="flex items-center justify-between pb-1">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-xs sm:text-sm text-black mt-0.5">
+            Here's what's happening today.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-black text-xs font-bold ring-2 ring-white/20 shadow-xs cursor-pointer hover:ring-[#7738FF]/60 transition"
+            style={{ backgroundColor: currentUser.avatarBg || '#7738FF' }}
+            title={currentUser.name}
+          >
+            {currentUser.avatarText || 'EE'}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. THREE STAT TILES (Tasks, Meetings, Progress - Exact Match to Reference UI) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Tile 1: Tasks */}
+        <div 
+          onClick={onOpenTasks}
+          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+            <CheckSquare className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-800 leading-snug">
-              Hello {currentUser.name.split(' ')[0]}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {pendingTasks.length > 0
-                ? `${pendingTasks.length} active tasks · ${upcomingMeetingsCount} upcoming meetings`
-                : 'All departmental workflows up to date'}
-            </p>
-          </div>
-        </div>
-
-        {/* Card 2: Scheduled Meetings Stat */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <h3 className="text-xs font-bold text-slate-700">
-            Scheduled meetings
-          </h3>
-          <div className="my-2">
-            <span className="text-3xl font-extrabold text-slate-900 tabular-nums">
-              {upcomingMeetingsCount}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span>Upcoming sessions</span>
-            <div className="flex items-center gap-2">
-              <svg className="w-14 h-5" viewBox="0 0 60 20" fill="none">
-                <path
-                  d="M2 16L15 14L28 8L42 11L58 3"
-                  stroke="#10B981"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="font-bold text-emerald-600 text-xs tabular-nums">
-                Active
-              </span>
+            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+              {totalTasksCount}
+            </div>
+            <div className="text-xs text-black font-medium mt-1">
+              Tasks
             </div>
           </div>
         </div>
 
-        {/* Card 3: Assigned Tasks Stat */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <h3 className="text-xs font-bold text-slate-700">
-            Assigned tasks
-          </h3>
-          <div className="my-2">
-            <span className="text-3xl font-extrabold text-slate-900 tabular-nums">
-              {totalTasksCount}
-            </span>
+        {/* Tile 2: Meetings */}
+        <div 
+          onClick={onOpenMeetings}
+          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+            <Calendar className="w-4 h-4" />
           </div>
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span>{completedTasks.length} completed</span>
-            <div className="flex items-center gap-2">
-              <svg className="w-14 h-5" viewBox="0 0 60 20" fill="none">
-                <path
-                  d="M2 12L12 8L22 15L32 6L44 14L58 10"
-                  stroke="#006b3f"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="font-bold text-emerald-700 text-xs tabular-nums">
-                {pendingTasks.length} pending
-              </span>
+          <div>
+            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+              {upcomingMeetingsCount}
+            </div>
+            <div className="text-xs text-black font-medium mt-1">
+              Meetings
+            </div>
+          </div>
+        </div>
+
+        {/* Tile 3: Progress */}
+        <div 
+          onClick={onOpenTasks}
+          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+            <BarChart3 className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+              {progressPct}%
+            </div>
+            <div className="text-xs text-black font-medium mt-1">
+              Progress
             </div>
           </div>
         </div>
       </div>
 
-      {/* QUICK ACTIONS ROW */}
-      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-2 overflow-x-auto">
-        <span className="text-xs font-bold text-slate-700 shrink-0 pl-1">
-          Quick actions:
+      {/* 3. UPCOMING SECTION & GLOWING CTA (Exact Match to Reference UI) */}
+      <div className="glass-liquid-tile p-5 rounded-[24px] border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)] space-y-3">
+        <div className="flex items-center justify-between pb-1">
+          <h3 className="text-sm font-bold text-black tracking-wide">
+            Upcoming
+          </h3>
+          <span className="text-[11px] text-black font-medium">
+            Active Schedule
+          </span>
+        </div>
+
+        <div className="space-y-2.5">
+          {upcomingSchedule.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.id}
+                onClick={item.action}
+                className="glass-liquid-pill p-3.5 rounded-2xl flex items-center justify-between cursor-pointer group border border-white/80 hover:border-[#9A75FF]/45 hover:bg-white/80 transition"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shrink-0 shadow-xs">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs sm:text-sm font-bold text-black group-hover:text-[#7738FF] transition truncate">
+                      {item.title}
+                    </div>
+                    <div className="text-[11px] text-black mt-0.5 font-mono">
+                      {item.time}
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-black group-hover:text-black group-hover:translate-x-0.5 transition shrink-0 ml-2" />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Glowing + New Task Action Button (Matching Bottom Button in Reference UI) */}
+        <button
+          onClick={() => onQuickAction?.('task')}
+          className="w-full mt-2.5 py-3.5 rounded-2xl glass-liquid-cta font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-black shadow-[0_4px_24px_rgba(119,56,255,0.5),inset_0_1px_1px_rgba(255,255,255,0.45)] border border-white/30 hover:scale-[1.008] transition"
+        >
+          <Plus className="w-4 h-4 stroke-[3]" />
+          <span>New Task</span>
+        </button>
+      </div>
+
+      {/* 4. QUICK ACTIONS STRIP */}
+      <div className="glass-liquid-tile p-3.5 rounded-2xl flex items-center justify-between gap-2 overflow-x-auto border border-white/80 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+        <span className="text-xs font-bold text-black uppercase tracking-wider shrink-0 pl-1">
+          Directorate Shortcuts:
         </span>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => onQuickAction?.('task')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
-          >
-            <CheckSquare className="w-3.5 h-3.5 text-blue-600" />
-            <span>Create Task</span>
-          </button>
-          <button
             onClick={() => onQuickAction?.('meeting')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+            <Calendar className="w-3.5 h-3.5 text-sky-400" />
             <span>Schedule Meeting</span>
           </button>
           <button
             onClick={() => onQuickAction?.('document')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <FileText className="w-3.5 h-3.5 text-purple-600" />
+            <FileText className="w-3.5 h-3.5 text-[#7738FF]" />
             <span>Upload Document</span>
           </button>
           <button
             onClick={() => onQuickAction?.('announcement')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <Megaphone className="w-3.5 h-3.5 text-emerald-700" />
+            <Megaphone className="w-3.5 h-3.5 text-emerald-400" />
             <span>Publish Notice</span>
           </button>
           <button
             onClick={() => onQuickAction?.('message')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-pink-600" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#9A75FF]" />
             <span>Compose Message</span>
           </button>
         </div>
       </div>
 
-      {/* 2. ASSIGNED TASKS AND TASK STATUSES CARD */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
+      {/* 5. ASSIGNED TASKS AND TASK STATUSES TABLE */}
+      <div className="glass-liquid-tile p-5 rounded-2xl space-y-4 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-bold text-slate-800">
-              Assigned tasks & workflow status
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+              Assigned Tasks & Workflow Status
             </h3>
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[11px] font-semibold text-[#7738FF] bg-[#7738FF]/20 px-2.5 py-0.5 rounded-full border border-[#7738FF]/40">
               {pendingTasks.length} pending
             </span>
           </div>
           <button
             onClick={onOpenTasks}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 font-medium transition cursor-pointer"
+            className="flex items-center gap-1 text-xs text-black hover:text-[#7738FF] font-medium transition cursor-pointer"
           >
-            <span>Full list</span>
+            <span>Full List</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -225,7 +272,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="text-slate-400 text-[11px] border-b border-slate-100">
+                <tr className="text-black text-[11px] border-b border-slate-200/80">
                   <th className="pb-2 font-normal w-8">
                     <span className="sr-only">Select</span>
                   </th>
@@ -237,18 +284,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <th className="pb-2 font-normal text-right pr-2">Assignee</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-200/60">
                 {tasks.slice(0, 6).map((task) => {
                   const isSelected = selectedTaskIds.includes(task.id);
                   return (
-                    <tr key={task.id} className="hover:bg-slate-50 transition">
+                    <tr key={task.id} className="hover:bg-white/60 transition">
                       <td className="py-3">
                         <button
                           onClick={() => toggleSelectTask(task.id)}
                           className={`w-4 h-4 rounded border flex items-center justify-center transition cursor-pointer ${
                             isSelected
-                              ? 'bg-blue-600 border-blue-600 text-white'
-                              : 'border-slate-300 hover:border-slate-400'
+                              ? 'bg-[#7738FF] border-[#9A75FF] text-black shadow-xs'
+                              : 'border-white/20 hover:border-[#7738FF]'
                           }`}
                           aria-label="Select task"
                         >
@@ -256,31 +303,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </button>
                       </td>
 
-                      <td className="py-3 font-semibold text-slate-800 pr-3">
+                      <td className="py-3 font-semibold text-black pr-3">
                         <div className="max-w-[240px] truncate" title={task.title}>
                           {task.title}
                         </div>
                       </td>
 
-                      <td className="py-3 text-slate-500 whitespace-nowrap">
+                      <td className="py-3 text-black whitespace-nowrap">
                         {task.category || 'Human Resources'}
                       </td>
 
-                      <td className="py-3 text-slate-500 whitespace-nowrap">
+                      <td className="py-3 text-black whitespace-nowrap font-mono tabular-nums">
                         {task.dueDate}
                       </td>
 
                       <td className="py-3">
                         {task.priority === 'Low' ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-emerald-700 border border-emerald-300 bg-emerald-50">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-emerald-300 border border-emerald-500/30 bg-emerald-500/15">
                             Low
                           </span>
                         ) : task.priority === 'Medium' ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-emerald-800 border border-emerald-300 bg-emerald-50">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-amber-300 border border-amber-500/30 bg-amber-500/15">
                             Medium
                           </span>
                         ) : (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-red-700 border border-red-300 bg-red-50">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-rose-300 border border-rose-500/30 bg-rose-500/15">
                             {task.priority}
                           </span>
                         )}
@@ -301,10 +348,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           }}
                           className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold cursor-pointer transition ${
                             task.status === 'COMPLETED'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
                               : task.status === 'IN_PROGRESS'
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                              ? 'bg-[#7738FF]/20 text-[#7738FF] border border-[#7738FF]/40'
+                              : 'bg-white/[0.05] text-black border border-slate-200/80'
                           }`}
                           title="Click to toggle status"
                         >
@@ -314,12 +361,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                       <td className="py-3 text-right pr-2">
                         <div className="inline-flex items-center justify-end gap-1.5">
-                          <span className="text-[11px] text-slate-500 hidden sm:inline">
+                          <span className="text-[11px] text-black hidden sm:inline">
                             {task.assigneeName}
                           </span>
                           <div
-                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-2xs"
-                            style={{ backgroundColor: '#006b3f' }}
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-black text-[10px] font-bold shadow-xs ring-1 ring-white/20"
+                            style={{ backgroundColor: '#7738FF' }}
                             title={`Assignee: ${task.assigneeName}`}
                           >
                             {task.assigneeName
@@ -338,28 +385,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </table>
           </div>
         ) : (
-          <div className="text-center py-8 text-xs text-slate-400">
+          <div className="text-center py-8 text-xs text-black">
             No pending tasks assigned
           </div>
         )}
       </div>
 
-      {/* 3. COMMUNICATION CARD */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <div className="flex items-center justify-between mb-3">
+      {/* 6. COMMUNICATION CARD */}
+      <div className="glass-liquid-tile p-5 rounded-2xl space-y-3 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-bold text-slate-800">
-              Communication (Last 7 days)
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+              Communication (Last 7 Days)
             </h3>
             {unreadCount > 0 ? (
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
+              <span className="w-2 h-2 rounded-full bg-[#7738FF] shadow-[0_0_8px_#7738FF]"></span>
             ) : null}
           </div>
           <button
             onClick={onOpenMessages}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 font-medium transition cursor-pointer"
+            className="flex items-center gap-1 text-xs text-black hover:text-[#7738FF] font-medium transition cursor-pointer"
           >
-            <span>See all</span>
+            <span>See All</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -370,43 +417,43 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div
                 key={msg.id}
                 onClick={onOpenMessages}
-                className="group cursor-pointer hover:bg-slate-50 p-2.5 rounded-xl transition border border-transparent hover:border-slate-100"
+                className="group cursor-pointer glass-liquid-pill p-3 rounded-xl transition"
               >
-                <div className="flex items-center justify-between font-bold text-slate-800">
-                  <span className="group-hover:text-emerald-700 transition">
+                <div className="flex items-center justify-between font-bold text-black">
+                  <span className="group-hover:text-[#7738FF] transition">
                     {msg.senderName}
                   </span>
-                  <div className="flex items-center gap-2 text-slate-400 text-[11px] font-normal">
-                    <span>{msg.timeAgo}</span>
+                  <div className="flex items-center gap-2 text-black text-[11px] font-normal">
+                    <span className="font-mono">{msg.timeAgo}</span>
                     {msg.unread && (
-                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-[#7738FF] shadow-[0_0_8px_#7738FF]"></span>
                     )}
                   </div>
                 </div>
-                <p className="text-slate-500 text-[11px] line-clamp-1 mt-0.5">
+                <p className="text-black text-[11px] line-clamp-1 mt-1">
                   {msg.text}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 text-xs text-slate-400">
+          <div className="text-center py-6 text-xs text-black">
             No recent communications recorded
           </div>
         )}
       </div>
 
-      {/* 4. RECENTLY UPLOADED DOCUMENTS & PUBLISHED ANNOUNCEMENTS (2 COLUMNS) */}
+      {/* 7. RECENTLY UPLOADED DOCUMENTS & PUBLISHED ANNOUNCEMENTS (2 COLUMNS) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Card: Recently uploaded documents */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-bold text-slate-800">
-              Recently uploaded documents
+        <div className="glass-liquid-tile p-5 rounded-2xl space-y-3 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+              Recently Uploaded Documents
             </h3>
             <button
               onClick={onOpenDocuments}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 font-medium transition cursor-pointer"
+              className="flex items-center gap-1 text-xs text-black hover:text-[#7738FF] font-medium transition cursor-pointer"
             >
               <span>Repository</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -418,91 +465,81 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {data.recentDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:bg-slate-100/70 transition"
+                  className="flex items-center justify-between p-2.5 rounded-xl glass-liquid-pill transition"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <FileText className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <FileText className="w-4 h-4 text-[#7738FF] shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-800 text-[11px] truncate" title={doc.name}>
+                      <div className="font-semibold text-black text-[11px] truncate" title={doc.name}>
                         {doc.name}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-black">
                         {doc.uploadedBy} · {doc.fileSize}
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => onDownloadAttachment(doc.name)}
-                    className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition cursor-pointer"
-                    title="Download document"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-xs text-slate-400">
-              No documents recently uploaded
+            <div className="text-center py-6 text-xs text-black">
+              No recent documents found
             </div>
           )}
         </div>
 
-        {/* Card: Published announcements */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-bold text-slate-800">
-              Published announcements
+        {/* Card: Published Announcements */}
+        <div className="glass-liquid-tile p-5 rounded-2xl space-y-3 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+              Directorate Notices
             </h3>
             <button
               onClick={onOpenAnnouncements}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 font-medium transition cursor-pointer"
+              className="flex items-center gap-1 text-xs text-black hover:text-[#7738FF] font-medium transition cursor-pointer"
             >
-              <span>All notices</span>
+              <span>Notices</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {data.recentAnnouncements && data.recentAnnouncements.length > 0 ? (
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs">
               {data.recentAnnouncements.map((ann) => {
-                const isAck = ann.acknowledgedBy.includes(currentUser.id);
+                const isAck = ann.acknowledgedBy?.includes(currentUser.id);
                 return (
                   <div
                     key={ann.id}
-                    className="p-2.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:bg-slate-100/70 transition space-y-1"
+                    className="p-3 rounded-xl glass-liquid-pill space-y-1.5"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        {ann.pinned && <Pin className="w-3 h-3 text-emerald-700 rotate-45" />}
-                        <span className="font-bold text-slate-800 text-[11px] truncate max-w-[180px]">
-                          {ann.title}
-                        </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-semibold text-black text-[11px] truncate">
+                        {ann.title}
                       </div>
                       <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                           ann.priority === 'High'
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-300'
                             : ann.priority === 'Medium'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-emerald-100 text-emerald-700'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-300'
+                            : 'bg-emerald-50 text-emerald-700 border border-emerald-300'
                         }`}
                       >
                         {ann.priority}
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-500 line-clamp-1">
+                    <p className="text-[10px] text-black line-clamp-1">
                       {ann.content}
                     </p>
-                    <div className="flex items-center justify-between pt-0.5 text-[9px] text-slate-400">
-                      <span>{ann.publishedAt}</span>
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/80 text-[10px] text-black">
+                      <span className="font-mono">{ann.publishedAt}</span>
                       <button
                         onClick={() => onAcknowledgeAnnouncement?.(ann.id)}
                         className={`font-semibold cursor-pointer ${
-                          isAck ? 'text-emerald-600' : 'text-emerald-700 hover:text-emerald-800'
+                          isAck ? 'text-emerald-400' : 'text-[#7738FF] hover:text-black'
                         }`}
                       >
-                        {isAck ? 'Acknowledged' : 'Acknowledge notice'}
+                        {isAck ? 'Acknowledged' : 'Acknowledge Notice'}
                       </button>
                     </div>
                   </div>
@@ -510,84 +547,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               })}
             </div>
           ) : (
-            <div className="text-center py-6 text-xs text-slate-400">
+            <div className="text-center py-6 text-xs text-black">
               No active announcements published
             </div>
           )}
         </div>
       </div>
 
-      {/* 5. UPCOMING MEETINGS & SCHEDULE CARD */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
+      {/* 8. RECENT OPERATIONAL AUDIT */}
+      <div className="glass-liquid-tile p-5 rounded-2xl space-y-3 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-slate-700" />
-            <h3 className="text-xs font-bold text-slate-800">
-              Upcoming meetings & calendar
+            <Activity className="w-3.5 h-3.5 text-[#7738FF]" />
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+              Recent Activity Relevant to You
             </h3>
           </div>
-          <button
-            onClick={onOpenMeetings}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 font-medium transition cursor-pointer"
-          >
-            <span>Open calendar</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {meetings.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {meetings.slice(0, 3).map((meeting) => (
-              <div
-                key={meeting.id}
-                className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 hover:bg-slate-100/60 transition flex flex-col justify-between space-y-2"
-              >
-                <div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                    <span className="font-semibold text-emerald-700">{meeting.dayLabel || meeting.date}</span>
-                    <span className="flex items-center gap-1 text-slate-400">
-                      <Clock className="w-3 h-3" />
-                      {meeting.startTime} - {meeting.endTime}
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-slate-800 text-xs line-clamp-1" title={meeting.title}>
-                    {meeting.title}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                    {meeting.description}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-slate-200/50 text-[10px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-slate-400" />
-                    <span className="truncate max-w-[120px]">{meeting.location}</span>
-                  </span>
-                  <span className="font-semibold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-200">
-                    {meeting.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6 text-xs text-slate-400">
-            No upcoming meetings scheduled
-          </div>
-        )}
-      </div>
-
-      {/* 6. RECENT ACTIVITY RELEVANT TO USER */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-slate-700" />
-            <h3 className="text-xs font-bold text-slate-800">
-              Recent activity relevant to you
-            </h3>
-          </div>
-          <span className="text-[10px] text-slate-400 font-medium">
-            Live operational audit
+          <span className="text-[10px] text-black font-medium">
+            Live Operational Audit
           </span>
         </div>
 
@@ -596,28 +573,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {data.recentActivity.map((log) => (
               <div
                 key={log.id}
-                className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                className="flex items-center justify-between p-2.5 rounded-xl glass-liquid-pill transition"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
-                  <span className="font-semibold text-slate-800 text-[11px] truncate">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#7738FF] shadow-[0_0_8px_#7738FF] shrink-0"></span>
+                  <span className="font-semibold text-black text-[11px] truncate">
                     {log.actor}
                   </span>
-                  <span className="text-slate-500 text-[11px]">
+                  <span className="text-black text-[11px]">
                     {log.action.replace(/_/g, ' ').toLowerCase()}
                   </span>
-                  <span className="font-medium text-slate-700 text-[11px] truncate max-w-[200px]">
+                  <span className="font-medium text-[#7738FF] text-[11px] truncate max-w-[200px]">
                     {log.target}
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 tabular-nums shrink-0 ml-2">
+                <div className="text-[10px] text-black tabular-nums font-mono shrink-0 ml-2">
                   {log.timestamp.includes('T') ? log.timestamp.split('T')[1].slice(0, 5) : log.timestamp}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-4 text-xs text-slate-400">
+          <div className="text-center py-4 text-xs text-black">
             No recent operational activity recorded
           </div>
         )}

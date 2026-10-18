@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, type FormEvent } from "react";
-import { User, Lock, Mail, Eye, EyeOff, ShieldCheck, KeyRound, Building2, HelpCircle, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { User, Lock, Mail, Eye, EyeOff, ShieldCheck, KeyRound, Building2, HelpCircle, CheckCircle2, AlertTriangle, ArrowRight, Sparkles } from "lucide-react";
 
 interface AuthSwitchProps {
   onLoginSuccess?: (user: any) => void;
@@ -9,8 +9,6 @@ interface AuthSwitchProps {
 }
 
 export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
-
   // Sign In Form State
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -19,36 +17,30 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
 
-  // Reset Request Form State (Form 2)
-  const [resetIdentifier, setResetIdentifier] = useState("");
-  const [resetNotes, setResetNotes] = useState("");
-  const [resetSubmitted, setResetSubmitted] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-
   // Helper for offline LAN authentication fallback
   const triggerOfflineFallback = (cleanIdentifier: string) => {
-    let name = 'Christian Aboagye';
-    let email = 'christian.aboagye@nya.gov.gh';
-    let username = 'christian.aboagye';
+    let name = 'Ekow Eshun';
+    let email = 'ekow.eshun@nya.gov.gh';
+    let username = 'ekow.eshun';
     let role = 'HR_ADMIN';
     let roleTitle = 'HEAD OF HR & OPERATIONS';
     let id = 'u1';
 
     const lower = cleanIdentifier.toLowerCase();
     if (lower.includes('frimpong')) {
-      name = 'Abena Frimpong';
+      name = 'Akosua Frimpong';
       email = 'a.frimpong@nya.gov.gh';
       username = 'a.frimpong';
-      role = 'DEPARTMENT_MANAGER';
-      roleTitle = 'PRINCIPAL HR OFFICER';
+      role = 'HR_MANAGER';
+      roleTitle = 'Principal HR Officer';
       id = 'u2';
-    } else if (lower.includes('oforiwaa')) {
-      name = 'Akosua Oforiwaa';
-      email = 'a.oforiwaa@nya.gov.gh';
-      username = 'a.oforiwaa';
-      role = 'STAFF_OFFICER';
-      roleTitle = 'PERSONNEL OFFICER';
-      id = 'u3';
+    } else if (lower.includes('gloria') || lower.includes('oforiwaa')) {
+      name = 'Miss Gloria';
+      email = 'miss.gloria@nya.gov.gh';
+      username = 'miss.gloria';
+      role = 'HR_OFFICER';
+      roleTitle = 'Senior Personnel Officer';
+      id = 'u4';
     }
 
     const fallbackUser = {
@@ -92,741 +84,220 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        // Check if user is using default/demo LAN credentials or if backend returned error
-        if (cleanId.includes('@nya.gov.gh') || cleanId.includes('christian') || cleanId.includes('aboagye') || cleanId.includes('frimpong') || cleanId.includes('oforiwaa')) {
+        if (cleanId.includes('@nya.gov.gh') || cleanId.includes('ekow') || cleanId.includes('eshun') || cleanId.includes('christian') || cleanId.includes('gloria') || cleanId.includes('oforiwaa') || cleanId.includes('frimpong')) {
           triggerOfflineFallback(cleanId);
           return;
         }
 
-        setErrorMessage(data.error || "Authentication failed. Please check credentials.");
         if (data.remainingAttempts !== undefined) {
           setRemainingAttempts(data.remainingAttempts);
         }
+        setErrorMessage(data.error || "Authentication failed. Check credentials.");
         return;
       }
 
-      if (data.success && data.user) {
-        if (data.sessionId) {
-          localStorage.setItem('nya_session_id', data.sessionId);
-        }
-        localStorage.setItem('nya_user', JSON.stringify(data.user));
-
+      if (data.user) {
+        localStorage.setItem("nya_session_id", data.sessionId || "");
+        localStorage.setItem("nya_user", JSON.stringify(data.user));
         if (onLoginSuccess) {
           onLoginSuccess(data.user);
         }
       }
-    } catch (err) {
-      // Offline / network fallback
+    } catch (err: any) {
       triggerOfflineFallback(cleanId);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Recovery Submit
-  const onResetSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!resetIdentifier.trim()) return;
-
-    setResetLoading(true);
-    try {
-      const res = await fetch("/api/auth/request-reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          identifier: resetIdentifier.trim(),
-          notes: resetNotes.trim()
-        })
-      });
-
-      if (res.ok) {
-        setResetSubmitted(true);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
   // Helper to quickly fill credentials for testers/evaluators
   const fillCredentials = (userType: 'admin' | 'manager' | 'officer') => {
     if (userType === 'admin') {
-      setIdentifier("christian.aboagye@nya.gov.gh");
+      setIdentifier("ekow.eshun@nya.gov.gh");
       setPassword("Admin@2026!NYA");
     } else if (userType === 'manager') {
       setIdentifier("a.frimpong@nya.gov.gh");
       setPassword("Staff@2026!NYA");
     } else {
-      setIdentifier("a.oforiwaa@nya.gov.gh");
+      setIdentifier("miss.gloria@nya.gov.gh");
       setPassword("Staff@2026!NYA");
     }
     setErrorMessage(null);
   };
 
   return (
-    <div className="auth-switch">
-      <style>{`
-        .auth-switch,
-        .auth-switch * {
-          box-sizing: border-box;
-        }
+    <div 
+      className="min-h-screen w-full bg-[#EEF2F8] bg-cover bg-center bg-fixed flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans select-none text-black"
+      style={{ backgroundImage: "url('/bg-glass-orbs.svg')" }}
+    >
+      {/* Dynamic 3D Spheres & Frosted Glass Elements matching user's uploaded wallpaper */}
+      <div className="fixed top-[15%] right-[10%] w-48 h-48 rounded-full bg-gradient-to-br from-[#93C5FD] via-[#2563EB] to-[#1E3A8A] shadow-[0_0_50px_rgba(37,99,235,0.5)] pointer-events-none z-0" />
+      <div className="fixed top-[45%] left-[2%] w-28 h-28 rounded-full bg-gradient-to-br from-[#93C5FD] via-[#2563EB] to-[#172554] shadow-[0_0_35px_rgba(37,99,235,0.45)] pointer-events-none z-0" />
+      <div className="fixed bottom-[-6%] left-[5%] w-[380px] h-[380px] rounded-full border-2 border-white bg-gradient-to-br from-white/90 via-blue-50/50 to-blue-100/20 shadow-xl pointer-events-none z-0" />
 
-        .auth-switch {
-          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: radial-gradient(circle at 15% 20%, #064e3b 0%, #006b3f 45%, #0f172a 100%);
-          min-height: 100vh;
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 20px;
-          position: relative;
-        }
+      {/* Main Glassmorphic Container Card - Transparent Frosted Glass */}
+      <div className="w-full max-w-[920px] glass-liquid-window rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10 border border-white/80 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.08),0_0_40px_rgba(59,130,246,0.10)]">
+        {/* Left Side: Brand & Visual Overview */}
+        <div className="relative p-8 lg:p-12 flex flex-col justify-between bg-white/[0.25] backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/50 overflow-hidden shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.85)]">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#7738FF]/15 rounded-full blur-3xl pointer-events-none"></div>
 
-        .container {
-          position: relative;
-          width: 100%;
-          max-width: 960px;
-          height: 600px;
-          background: #ffffff;
-          border-radius: 28px;
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
-          overflow: hidden;
-        }
-
-        .forms-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-        }
-
-        .signin-signup {
-          position: absolute;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          left: 75%;
-          width: 50%;
-          transition: 1s 0.7s ease-in-out;
-          display: grid;
-          grid-template-columns: 1fr;
-          z-index: 5;
-        }
-
-        form {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          padding: 0 3.5rem;
-          transition: all 0.2s 0.7s;
-          overflow: hidden;
-          grid-column: 1 / 2;
-          grid-row: 1 / 2;
-        }
-
-        form.sign-up-form {
-          opacity: 0;
-          z-index: 1;
-        }
-
-        form.sign-in-form {
-          z-index: 2;
-        }
-
-        .title {
-          font-size: 1.85rem;
-          color: #0f172a;
-          margin-bottom: 6px;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-          font-size: 0.8rem;
-          color: #64748b;
-          margin-bottom: 16px;
-          text-align: center;
-        }
-
-        .input-field {
-          max-width: 380px;
-          width: 100%;
-          background-color: #f8fafc;
-          border: 1px solid #e2e8f0;
-          margin: 7px 0;
-          height: 50px;
-          border-radius: 14px;
-          display: grid;
-          grid-template-columns: 14% 74% 12%;
-          padding: 0 0.5rem;
-          position: relative;
-          transition: 0.25s;
-          align-items: center;
-        }
-
-        .input-field:focus-within {
-          background-color: #ffffff;
-          border-color: #006b3f;
-          box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.15);
-        }
-
-        .input-field .icon-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #64748b;
-        }
-
-        .input-field input {
-          background: none;
-          outline: none;
-          border: none;
-          line-height: 1;
-          font-weight: 500;
-          font-size: 0.875rem;
-          color: #0f172a;
-          width: 100%;
-          padding: 0;
-        }
-
-        .input-field input::placeholder {
-          color: #94a3b8;
-          font-weight: 400;
-          font-size: 0.85rem;
-        }
-
-        .btn {
-          width: 160px;
-          background-color: #006b3f;
-          border: none;
-          outline: none;
-          height: 46px;
-          border-radius: 14px;
-          color: #ffffff;
-          text-transform: uppercase;
-          font-weight: 700;
-          letter-spacing: 0.04em;
-          margin: 12px 0 6px 0;
-          cursor: pointer;
-          transition: 0.3s;
-          font-size: 0.82rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-        }
-
-        .btn:hover {
-          background-color: #047857;
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(0, 107, 63, 0.35);
-        }
-
-        .btn:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .panels-container {
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          top: 0;
-          left: 0;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .panel {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          justify-content: space-around;
-          text-align: center;
-          z-index: 6;
-        }
-
-        .left-panel {
-          pointer-events: all;
-          padding: 3rem 16% 2rem 10%;
-        }
-
-        .right-panel {
-          pointer-events: none;
-          padding: 3rem 10% 2rem 16%;
-        }
-
-        .panel .content {
-          color: #ffffff;
-          transition: transform 0.9s ease-in-out;
-          transition-delay: 0.6s;
-        }
-
-        .panel h3 {
-          font-weight: 800;
-          line-height: 1.2;
-          font-size: 1.6rem;
-          margin-bottom: 10px;
-          letter-spacing: -0.02em;
-        }
-
-        .panel p {
-          font-size: 0.88rem;
-          padding: 0.6rem 0 1.2rem 0;
-          color: rgba(255, 255, 255, 0.9);
-          line-height: 1.5;
-        }
-
-        .btn.transparent {
-          margin: 0;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(8px);
-          border: 1.5px solid rgba(255, 255, 255, 0.7);
-          width: 170px;
-          height: 42px;
-          font-weight: 700;
-          font-size: 0.78rem;
-          color: #ffffff;
-          border-radius: 12px;
-        }
-
-        .btn.transparent:hover {
-          background: rgba(255, 255, 255, 0.28);
-          border-color: #ffffff;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .right-panel .content {
-          transform: translateX(800px);
-        }
-
-        .container.sign-up-mode:before {
-          transform: translate(100%, -50%);
-          right: 52%;
-        }
-
-        .container.sign-up-mode .left-panel .content {
-          transform: translateX(-800px);
-        }
-
-        .container.sign-up-mode .signin-signup {
-          left: 25%;
-        }
-
-        .container.sign-up-mode form.sign-up-form {
-          opacity: 1;
-          z-index: 2;
-        }
-
-        .container.sign-up-mode form.sign-in-form {
-          opacity: 0;
-          z-index: 1;
-        }
-
-        .container.sign-up-mode .right-panel .content {
-          transform: translateX(0%);
-        }
-
-        .container.sign-up-mode .left-panel {
-          pointer-events: none;
-        }
-
-        .container.sign-up-mode .right-panel {
-          pointer-events: all;
-        }
-
-        .container:before {
-          content: "";
-          position: absolute;
-          height: 2000px;
-          width: 2000px;
-          top: -10%;
-          right: 48%;
-          transform: translateY(-50%);
-          background: linear-gradient(-45deg, #064e3b 0%, #006b3f 40%, #059669 80%, #10b981 100%);
-          transition: 1.8s ease-in-out;
-          border-radius: 50%;
-          z-index: 6;
-          box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.15);
-        }
-
-        .social-text {
-          padding: 0.5rem 0 0.3rem 0;
-          font-size: 0.78rem;
-          color: #64748b;
-          font-weight: 600;
-        }
-
-        .social-media {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .demo-chip {
-          padding: 5px 10px;
-          border-radius: 20px;
-          background-color: #f1f5f9;
-          border: 1px solid #cbd5e1;
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: #334155;
-          cursor: pointer;
-          transition: 0.2s;
-        }
-
-        .demo-chip:hover {
-          background-color: #e2e8f0;
-          border-color: #006b3f;
-          color: #006b3f;
-          transform: translateY(-1px);
-        }
-
-        .error-banner {
-          max-width: 380px;
-          width: 100%;
-          padding: 8px 12px;
-          background-color: #fef2f2;
-          border: 1px solid #fecaca;
-          color: #b91c1c;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          text-align: left;
-        }
-
-        @media (max-width: 870px) {
-          .container {
-            min-height: 800px;
-            height: 100vh;
-          }
-          .signin-signup {
-            width: 100%;
-            top: 95%;
-            transform: translate(-50%, -100%);
-            transition: 1s 0.8s ease-in-out;
-          }
-          .signin-signup,
-          .container.sign-up-mode .signin-signup {
-            left: 50%;
-          }
-          .panels-container {
-            grid-template-columns: 1fr;
-            grid-template-rows: 1fr 2fr 1fr;
-          }
-          .panel {
-            flex-direction: row;
-            justify-content: space-around;
-            align-items: center;
-            padding: 2.5rem 8%;
-            grid-column: 1 / 2;
-          }
-          .right-panel {
-            grid-row: 3 / 4;
-          }
-          .left-panel {
-            grid-row: 1 / 2;
-          }
-          .panel .content {
-            padding-right: 15%;
-            transition: transform 0.9s ease-in-out;
-            transition-delay: 0.8s;
-          }
-          .panel h3 {
-            font-size: 1.2rem;
-          }
-          .panel p {
-            font-size: 0.7rem;
-            padding: 0.5rem 0;
-          }
-          .btn.transparent {
-            width: 120px;
-            height: 38px;
-            font-size: 0.72rem;
-          }
-          .container:before {
-            width: 1500px;
-            height: 1500px;
-            transform: translateX(-50%);
-            left: 30%;
-            bottom: 68%;
-            right: initial;
-            top: initial;
-            transition: 2s ease-in-out;
-          }
-          .container.sign-up-mode:before {
-            transform: translate(-50%, 100%);
-            bottom: 32%;
-            right: initial;
-          }
-          .container.sign-up-mode .left-panel .content {
-            transform: translateY(-300px);
-          }
-          .container.sign-up-mode .right-panel .content {
-            transform: translateY(0px);
-          }
-          .right-panel .content {
-            transform: translateY(300px);
-          }
-          .container.sign-up-mode .signin-signup {
-            top: 5%;
-            transform: translate(-50%, 0);
-          }
-        }
-
-        @media (max-width: 570px) {
-          form {
-            padding: 0 1.5rem;
-          }
-          .panel .content {
-            padding: 0.5rem 1rem;
-          }
-          .container {
-            padding: 1.5rem 0;
-          }
-          .container:before {
-            bottom: 72%;
-            left: 50%;
-          }
-          .container.sign-up-mode:before {
-            bottom: 28%;
-            left: 50%;
-          }
-        }
-      `}</style>
-
-      <div className={`container ${isSignUp ? "sign-up-mode" : ""}`}>
-        <div className="forms-container">
-          <div className="signin-signup">
-            {/* Form 1: Sign In */}
-            <form onSubmit={onSignInSubmit} className="sign-in-form">
-              {/* NYA Ghana Logo & Badge */}
-              <div className="flex items-center gap-2 mb-2">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#7738FF]/30 via-[#9A75FF]/15 to-transparent p-0.5 border border-white/85 shadow-xs shrink-0 flex items-center justify-center overflow-hidden">
                 <img
                   src="/logo.jpg"
                   alt="National Youth Authority Ghana"
-                  className="w-8 h-8 rounded-full object-contain border border-slate-200 bg-white"
+                  className="w-full h-full object-contain rounded-xl bg-white p-0.5"
                 />
-                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
+              </div>
+              <div>
+                <div className="font-bold text-black tracking-tight text-base leading-tight">
+                  HR Central
+                </div>
+                <div className="text-[10px] text-[#7738FF] font-bold tracking-wider uppercase">
                   National Youth Authority · Ghana
-                </span>
+                </div>
               </div>
+            </div>
 
-              <h2 className="title">Staff Sign In</h2>
-              <p className="subtitle">
-                HR Central LAN Portal · Offline Local Deployment
-              </p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-black tracking-tight leading-tight mt-6">
+              Executive Staff & Operations Portal
+            </h1>
+            <p className="text-xs text-black mt-3 leading-relaxed">
+              Internal human resources, national service personnel postings, youth training institute management, and secure local messaging.
+            </p>
+          </div>
 
-              {errorMessage && (
-                <div className="error-banner">
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
+          <div className="pt-8 space-y-3">
+            <div className="p-3.5 rounded-2xl bg-white/60 border border-slate-200/80 shadow-xs text-xs text-black">
+              <div className="font-bold text-black flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+                <span>LAN Offline Architecture</span>
+              </div>
+              <div className="text-[11px] text-black mt-1">
+                Zero external dependencies. Operates seamlessly across local area office networks.
+              </div>
+            </div>
 
-              {remainingAttempts !== null && remainingAttempts < 5 && (
-                <div className="max-w-[380px] w-full mb-2 p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 font-medium text-left">
-                  ⚠️ Protection Active: {remainingAttempts} attempt(s) remaining before account lockout.
-                </div>
-              )}
+            <div className="text-[10px] text-black font-mono text-center">
+              NYA HR Central Engine · Secure Local Instance v4.2
+            </div>
+          </div>
+        </div>
 
+        {/* Right Side: Sign In Form */}
+        <div className="p-8 lg:p-12 flex flex-col justify-center bg-white/[0.15]">
+          <div className="max-w-sm mx-auto w-full">
+            <h2 className="text-xl font-bold text-black tracking-tight">
+              Staff Authentication
+            </h2>
+            <p className="text-xs text-black mt-1 mb-6">
+              Enter your official staff credentials to begin session
+            </p>
+
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {remainingAttempts !== null && remainingAttempts < 5 && (
+              <div className="mb-4 p-2.5 bg-amber-500/15 border border-amber-500/30 rounded-xl text-amber-300 text-xs">
+                ⚠️ Security Notice: {remainingAttempts} attempt(s) remaining before account lockout.
+              </div>
+            )}
+
+            <form onSubmit={onSignInSubmit} className="space-y-4">
               {/* Username or Email Input */}
-              <div className="input-field">
-                <div className="icon-container">
-                  <Mail className="w-4 h-4" />
+              <div>
+                <label className="block text-[11px] font-semibold text-black mb-1.5 uppercase tracking-wider">
+                  Official Email or Staff Username
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7738FF]" />
+                  <input
+                    type="text"
+                    placeholder="e.g. ekow.eshun@nya.gov.gh"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    autoComplete="username"
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/70 text-black placeholder-[#A6B0C8]/50 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none focus:ring-2 focus:ring-[#7738FF]/30 transition-all shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]"
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Official Email or Staff Username"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  autoComplete="username"
-                  required
-                />
-                <div></div>
               </div>
 
-              {/* Password Input with show/hide toggle */}
-              <div className="input-field">
-                <div className="icon-container">
-                  <Lock className="w-4 h-4" />
+              {/* Password Input */}
+              <div>
+                <label className="block text-[11px] font-semibold text-black mb-1.5 uppercase tracking-wider">
+                  Security Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7738FF]" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 bg-white/70 text-black placeholder-[#A6B0C8]/50 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none focus:ring-2 focus:ring-[#7738FF]/30 transition-all shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-black cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
+              </div>
+
+              <div className="pt-2">
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="icon-container hover:text-emerald-700 cursor-pointer"
-                  tabIndex={-1}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 px-4 glass-liquid-cta rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <span>{loading ? "Authenticating Session..." : "Sign In to HR Central"}</span>
+                  {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
+            </form>
 
-              <div className="flex items-center justify-center max-w-[380px] w-full text-[11px] text-slate-500 my-1 px-1">
-                <span className="flex items-center gap-1 text-emerald-800 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  Offline LAN Protected Access
-                </span>
+            {/* Quick Fill Test Credentials */}
+            <div className="mt-8 pt-6 border-t border-slate-200/80">
+              <div className="text-[11px] font-bold text-black uppercase tracking-wider mb-2.5">
+                Quick Fill Test Credentials:
               </div>
-
-              <button type="submit" className="btn" disabled={loading}>
-                <span>{loading ? "Authenticating..." : "Sign In"}</span>
-                {!loading && <ArrowRight className="w-4 h-4" />}
-              </button>
-
-              {/* Quick Preset Selector for Testing & Evaluation */}
-              <p className="social-text">Quick Fill Test Credentials:</p>
-              <div className="social-media">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => fillCredentials('admin')}
-                  className="demo-chip"
+                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
                   title="Head of HR & Admin"
                 >
-                  👑 Head of HR (Admin)
+                  Head of HR (Admin)
                 </button>
                 <button
                   type="button"
                   onClick={() => fillCredentials('manager')}
-                  className="demo-chip"
+                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
                   title="Principal HR Officer"
                 >
-                  💼 Principal HR Officer
+                  Principal HR Officer
                 </button>
                 <button
                   type="button"
                   onClick={() => fillCredentials('officer')}
-                  className="demo-chip"
+                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
                   title="Personnel Officer"
                 >
-                  📋 Personnel Officer
+                  Personnel Officer
                 </button>
               </div>
-            </form>
-
-            {/* Form 2: Password Recovery / Admin Assistance (Reframed) */}
-            <form onSubmit={onResetSubmit} className="sign-up-form">
-              <div className="flex items-center gap-2 mb-2">
-                <KeyRound className="w-5 h-5 text-emerald-700" />
-                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
-                  Administrative Credential Recovery
-                </span>
-              </div>
-
-              <h2 className="title text-center">Reset Request</h2>
-              <p className="subtitle">
-                For offline LAN deployment, account creation and credential resets are strictly administered by the Head of HR.
-              </p>
-
-              {resetSubmitted ? (
-                <div className="max-w-[380px] w-full p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                  <div className="text-xs font-bold text-emerald-900">
-                    Recovery Request Registered
-                  </div>
-                  <p className="text-[11px] text-emerald-700">
-                    Your request for <strong>{resetIdentifier}</strong> has been transmitted to the Head of HR & Admin. A temporary password will be provisioned directly via the Administrative Console.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setResetSubmitted(false);
-                      setIsSignUp(false);
-                    }}
-                    className="btn mx-auto mt-2 text-xs"
-                  >
-                    Return to Sign In
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="input-field">
-                    <div className="icon-container">
-                      <Mail className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Official Staff Email or Staff ID"
-                      value={resetIdentifier}
-                      onChange={(e) => setResetIdentifier(e.target.value)}
-                      required
-                    />
-                    <div></div>
-                  </div>
-
-                  <div className="input-field">
-                    <div className="icon-container">
-                      <Building2 className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Department / Regional Secretariat (e.g. Accra HQ)"
-                      value={resetNotes}
-                      onChange={(e) => setResetNotes(e.target.value)}
-                    />
-                    <div></div>
-                  </div>
-
-                  <button type="submit" className="btn" disabled={resetLoading}>
-                    {resetLoading ? "Transmitting..." : "Submit Request"}
-                  </button>
-
-                  <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl max-w-[380px] w-full text-left text-[11px] text-slate-600 space-y-1">
-                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
-                      LAN Security Policy Notice:
-                    </div>
-                    <div>• Accounts are created and activated exclusively by the HR Directorate.</div>
-                    <div>• No reliance on third-party public clouds or external IdPs.</div>
-                  </div>
-                </>
-              )}
-            </form>
-          </div>
-        </div>
-
-        {/* Sliding Graphic Panels */}
-        <div className="panels-container">
-          {/* Left Panel */}
-          <div className="panel left-panel">
-            <div className="content">
-              <h3>National Youth Authority</h3>
-              <p>
-                Human Resources Directorate & Youth Development Operations.
-                Access staff deployments, training coordination, and internal personnel records.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Panel */}
-          <div className="panel right-panel">
-            <div className="content">
-              <h3>Existing Staff Member?</h3>
-              <p>
-                Return to the main staff authentication portal to log in with your assigned official username or email and security password.
-              </p>
-              <button
-                className="btn transparent"
-                onClick={() => setIsSignUp(false)}
-              >
-                Sign In Portal
-              </button>
             </div>
           </div>
         </div>
@@ -834,4 +305,5 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
     </div>
   );
 }
+
 export { AuthSwitch };

@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Soft Camera Lens Depth of Field Blur Filters -->
+    <filter id="bokeh-heavy-blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14" />
+    </filter>
+    <filter id="bokeh-medium-blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" />
+    </filter>
+    <filter id="bokeh-soft-blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" />
+    </filter>
+
+    <!-- Wall & Lighting Gradients -->
+    <linearGradient id="slate-wall-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A414D" />
+      <stop offset="50%" stop-color="#2D333E" />
+      <stop offset="100%" stop-color="#1E232B" />
+    </linearGradient>
+
+    <!-- Shelf Wood Gradient -->
+    <linearGradient id="shelf-wood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#EA580C" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <!-- Plant Leaf Gradients -->
+    <linearGradient id="leaf-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86EFAC" />
+      <stop offset="50%" stop-color="#22C55E" />
+      <stop offset="100%" stop-color="#14532D" />
+    </linearGradient>
+    <linearGradient id="leaf-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ADE80" />
+      <stop offset="100%" stop-color="#15803D" />
+    </linearGradient>
+
+    <!-- Book Spines Gradients -->
+    <linearGradient id="book-red" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" /><stop offset="100%" stop-color="#991B1B" />
+    </linearGradient>
+    <linearGradient id="book-blue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" /><stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+    <linearGradient id="book-green" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" /><stop offset="100%" stop-color="#064E3B" />
+    </linearGradient>
+    <linearGradient id="book-yellow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" /><stop offset="100%" stop-color="#78350F" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Dark Slate Wall Background -->
+  <rect width="100%" height="100%" fill="url(#slate-wall-bg)" />
+
+  <!-- Ambient Light Reflection on Right -->
+  <circle cx="1700" cy="300" r="600" fill="#64748B" opacity="0.12" filter="url(#bokeh-heavy-blur)" />
+  <circle cx="200" cy="900" r="400" fill="#38BDF8" opacity="0.08" filter="url(#bokeh-heavy-blur)" />
+
+  <!-- 2. LEFT SIDE: Bookshelf & Library Scene (Soft Out-of-focus Blurred) -->
+  <g filter="url(#bokeh-medium-blur)">
+    <!-- Industrial Black Metal Frame Structure -->
+    <line x1="180" y1="120" x2="180" y2="1000" stroke="#1E293B" stroke-width="12" />
+    <line x1="850" y1="120" x2="850" y2="1000" stroke="#1E293B" stroke-width="12" />
+    <line x1="180" y1="200" x2="850" y2="200" stroke="#0F172A" stroke-width="8" />
+
+    <!-- Shelves (Warm Wood Orange Accent Trims) -->
+    <!-- Top Shelf -->
+    <rect x="160" y="420" width="710" height="22" rx="4" fill="url(#shelf-wood)" opacity="0.9" />
+    <rect x="160" y="442" width="710" height="12" fill="#78350F" opacity="0.8" />
+
+    <!-- Middle Shelf -->
+    <rect x="160" y="720" width="710" height="22" rx="4" fill="url(#shelf-wood)" opacity="0.9" />
+    <rect x="160" y="742" width="710" height="12" fill="#78350F" opacity="0.8" />
+
+    <!-- TOP SHELF BOOKS & ACCENTS -->
+    <!-- Group of Books Left -->
+    <rect x="220" y="260" width="35" height="160" rx="3" fill="url(#book-red)" />
+    <rect x="258" y="280" width="30" height="140" rx="3" fill="url(#book-green)" />
+    <rect x="290" y="250" width="45" height="170" rx="3" fill="url(#book-blue)" />
+    <rect x="338" y="290" width="28" height="130" rx="3" fill="url(#book-yellow)" />
+    <rect x="368" y="270" width="38" height="150" rx="3" fill="url(#book-green)" />
+    <rect x="408" y="260" width="32" height="160" rx="3" fill="url(#book-blue)" />
+
+    <!-- Vibrant Red Box Accent on Top Shelf Right -->
+    <rect x="620" y="320" width="110" height="100" rx="8" fill="#EF4444" opacity="0.95" />
+    <rect x="630" y="310" width="90" height="15" rx="3" fill="#DC2626" />
+
+    <!-- MIDDLE SHELF BOOKS -->
+    <rect x="200" y="550" width="38" height="170" rx="3" fill="url(#book-yellow)" />
+    <rect x="240" y="530" width="42" height="190" rx="3" fill="url(#book-blue)" />
+    <rect x="284" y="560" width="30" height="160" rx="3" fill="#E11D48" />
+    <rect x="316" y="540" width="40" height="180" rx="3" fill="url(#book-green)" />
+    <rect x="358" y="570" width="35" height="150" rx="3" fill="url(#book-red)" />
+
+    <!-- Potted Plant on Middle Shelf (Yellow Pot) -->
+    <ellipse cx="490" cy="690" rx="45" ry="30" fill="#FACC15" />
+    <rect x="450" y="640" width="80" height="55" rx="10" fill="#EAB308" />
+    <!-- Plant Leaves inside Yellow Pot -->
+    <circle cx="470" cy="610" r="35" fill="url(#leaf-grad-1)" />
+    <circle cx="510" cy="600" r="30" fill="url(#leaf-grad-2)" />
+    <circle cx="490" cy="580" r="28" fill="#4ADE80" />
+
+    <!-- Blue Bowl Accent -->
+    <ellipse cx="250" cy="690" rx="35" ry="20" fill="#0284C7" />
+
+    <!-- Dark Vase on Middle Shelf -->
+    <rect x="610" y="590" width="70" height="130" rx="20" fill="#1E293B" />
+
+    <!-- BOTTOM SHELF BOOKS -->
+    <g transform="translate(180, 780)">
+      <rect x="20" y="20" width="32" height="180" rx="3" fill="url(#book-red)" />
+      <rect x="54" y="10" width="36" height="190" rx="3" fill="url(#book-yellow)" />
+      <rect x="92" y="30" width="40" height="170" rx="3" fill="url(#book-blue)" />
+      <rect x="134" y="15" width="28" height="185" rx="3" fill="url(#book-green)" />
+      <rect x="164" y="25" width="42" height="175" rx="3" fill="url(#book-red)" />
+
+      <!-- Horizontal Stack of Books -->
+      <rect x="230" y="140" width="160" height="28" rx="4" fill="url(#book-green)" />
+      <rect x="235" y="112" width="150" height="26" rx="4" fill="url(#book-yellow)" />
+      <rect x="240" y="86" width="140" height="24" rx="4" fill="url(#book-blue)" />
+
+      <rect x="420" y="30" width="38" height="170" rx="3" fill="url(#book-green)" />
+      <rect x="460" y="20" width="45" height="180" rx="3" fill="url(#book-blue)" />
+      <rect x="507" y="40" width="35" height="160" rx="3" fill="url(#book-yellow)" />
+    </g>
+  </g>
+
+  <!-- 3. LEFT FOREGROUND VINE/PLANT (Extra Soft Blur Bokeh) -->
+  <g filter="url(#bokeh-heavy-blur)" opacity="0.85">
+    <path d="M 50,-100 Q 120,300 80,700 Q 40,1000 120,1100" stroke="#15803D" stroke-width="18" fill="none" />
+    <circle cx="110" cy="150" r="60" fill="url(#leaf-grad-1)" />
+    <circle cx="70" cy="280" r="75" fill="url(#leaf-grad-2)" />
+    <circle cx="130" cy="420" r="85" fill="#22C55E" />
+    <circle cx="80" cy="580" r="90" fill="url(#leaf-grad-1)" />
+    <circle cx="140" cy="750" r="100" fill="url(#leaf-grad-2)" />
+  </g>
+
+  <!-- 4. RIGHT SIDE: Lush Tropical Monstera & House Plants (Bokeh Blur) -->
+  <g filter="url(#bokeh-medium-blur)">
+    <!-- Main Monstera Cut-Out Leaves (Top Right) -->
+    <g transform="translate(1100, 100)">
+      <!-- Giant Monstera Leaf 1 -->
+      <path d="M 120,150 C 220,50 380,80 420,220 C 450,330 350,480 220,460 C 110,440 60,300 120,150 Z" fill="url(#leaf-grad-1)" />
+      <!-- Cutouts in Monstera Leaf -->
+      <ellipse cx="220" cy="220" rx="30" ry="80" transform="rotate(-25, 220, 220)" fill="#2D333E" />
+      <ellipse cx="310" cy="260" rx="25" ry="70" transform="rotate(15, 310, 260)" fill="#2D333E" />
+      <ellipse cx="260" cy="350" rx="20" ry="60" transform="rotate(45, 260, 350)" fill="#2D333E" />
+    </g>
+
+    <g transform="translate(950, 20)">
+      <circle cx="150" cy="200" r="110" fill="url(#leaf-grad-2)" opacity="0.9" />
+      <circle cx="280" cy="140" r="130" fill="#166534" opacity="0.85" />
+    </g>
+
+    <!-- Large Right Houseplants (Fiddle Leaf Fig & Bush) -->
+    <g transform="translate(1200, 380)">
+      <!-- Pot -->
+      <polygon points="250,550 350,550 380,380 220,380" fill="#1E293B" />
+      <rect x="210" y="360" width="180" height="25" rx="5" fill="#334155" />
+
+      <!-- Dense Lush Leaves Stack -->
+      <circle cx="180" cy="300" r="110" fill="url(#leaf-grad-1)" />
+      <circle cx="320" cy="260" r="130" fill="url(#leaf-grad-2)" />
+      <circle cx="240" cy="180" r="140" fill="#22C55E" />
+      <circle cx="380" cy="220" r="120" fill="#15803D" />
+      <circle cx="120" cy="220" r="95" fill="#4ADE80" />
+
+      <!-- Upper Leaves -->
+      <circle cx="280" cy="60" r="120" fill="url(#leaf-grad-1)" />
+      <circle cx="190" cy="-20" r="100" fill="url(#leaf-grad-2)" />
+      <circle cx="360" cy="-10" r="110" fill="#166534" />
+      <circle cx="290" cy="-100" r="90" fill="#22C55E" />
+    </g>
+  </g>
+
+  <!-- 5. Camera Bokeh Light Circles & Warm Ambient Lens Flare -->
+  <g filter="url(#bokeh-soft-blur)" opacity="0.35">
+    <circle cx="180" cy="650" r="18" fill="#FDE047" />
+    <circle cx="210" cy="620" r="12" fill="#FFFFFF" />
+    <circle cx="240" cy="670" r="15" fill="#60A5FA" />
+    <circle cx="1350" cy="520" r="22" fill="#86EFAC" />
+    <circle cx="1420" cy="480" r="16" fill="#F472B6" />
+    <circle cx="1280" cy="600" r="25" fill="#FBBF24" />
+    <circle cx="700" cy="350" r="30" fill="#EF4444" opacity="0.6" />
+  </g>
+</svg>

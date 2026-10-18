@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Background Base Gradient -->
+    <linearGradient id="bgBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F9FAFC"/>
+      <stop offset="45%" stop-color="#EFF3F9"/>
+      <stop offset="100%" stop-color="#E5ECF6"/>
+    </linearGradient>
+
+    <!-- Top-Center Frosted Bubble Gradient -->
+    <radialGradient id="topCenterBubble" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#EBF2FC" stop-opacity="0.55"/>
+      <stop offset="85%" stop-color="#D7E5F9" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#C8DBF6" stop-opacity="0.10"/>
+    </radialGradient>
+
+    <!-- Top-Right Vivid Royal Blue Sphere Gradient -->
+    <radialGradient id="royalBlueSphere1" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="25%" stop-color="#3B82F6"/>
+      <stop offset="65%" stop-color="#2563EB"/>
+      <stop offset="90%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </radialGradient>
+
+    <!-- Mid-Left Vivid Royal Blue Sphere Gradient -->
+    <radialGradient id="royalBlueSphere2" cx="32%" cy="28%" r="68%">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="30%" stop-color="#3B82F6"/>
+      <stop offset="70%" stop-color="#2563EB"/>
+      <stop offset="95%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#172554"/>
+    </radialGradient>
+
+    <!-- Right Overlapping Glass Disc Gradient -->
+    <radialGradient id="rightGlassDisc" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#E2EDFC" stop-opacity="0.45"/>
+      <stop offset="80%" stop-color="#D0E2FA" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#BFD7F8" stop-opacity="0.08"/>
+    </radialGradient>
+
+    <!-- Bottom-Left Pearl Frosted Sphere Gradient -->
+    <radialGradient id="bottomLeftSphere" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#F2F6FD" stop-opacity="0.80"/>
+      <stop offset="75%" stop-color="#DCE8FA" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#CADDF7" stop-opacity="0.15"/>
+    </radialGradient>
+
+    <!-- Soft Glow Filter for Royal Blue Spheres -->
+    <filter id="blueGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="35" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Subtle Diffuse Shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="25" stdDeviation="40" flood-color="#1E3A8A" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- Glass Rim Highlight Filter -->
+    <filter id="glassBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <!-- Base Canvas -->
+  <rect width="100%" height="100%" fill="url(#bgBase)"/>
+
+  <!-- 1. Ambient Background Refraction Bloom -->
+  <circle cx="1650" cy="400" r="450" fill="#3B82F6" opacity="0.18" filter="url(#glassBlur)"/>
+  <circle cx="150" cy="580" r="300" fill="#2563EB" opacity="0.12" filter="url(#glassBlur)"/>
+  <circle cx="1000" cy="250" r="600" fill="#93C5FD" opacity="0.15" filter="url(#glassBlur)"/>
+
+  <!-- 2. Giant Top-Center Translucent Glass Sphere -->
+  <circle cx="1050" cy="220" r="540" fill="url(#topCenterBubble)" stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.5" filter="url(#softShadow)"/>
+  
+  <!-- 3. Upper-Right Vivid Royal Blue Sphere (Layered behind the overlapping right disc) -->
+  <circle cx="1660" cy="420" r="145" fill="url(#royalBlueSphere1)" filter="url(#blueGlow)"/>
+
+  <!-- 4. Large Right Overlapping Frosted Glass Lens / Bubble -->
+  <circle cx="1780" cy="680" r="520" fill="url(#rightGlassDisc)" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2"/>
+  <!-- Specular inner rim reflection on right lens -->
+  <ellipse cx="1720" cy="620" rx="460" ry="460" fill="none" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- 5. Mid-Left Vivid Royal Blue Floating Sphere -->
+  <circle cx="60" cy="600" r="95" fill="url(#royalBlueSphere2)" filter="url(#blueGlow)"/>
+
+  <!-- 6. Bottom-Left 3D Frosted Pearl Sphere -->
+  <circle cx="240" cy="1020" r="360" fill="url(#bottomLeftSphere)" stroke="rgba(255, 255, 255, 0.9)" stroke-width="2"/>
+  <!-- Crescent rim light on bottom-left pearl sphere -->
+  <path d="M 60,820 A 360,360 0 0,1 480,880" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.85"/>
+  <circle cx="210" cy="980" r="320" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1"/>
+
+  <!-- 7. Subtle ethereal specular light flares -->
+  <ellipse cx="980" cy="140" rx="320" ry="180" fill="#FFFFFF" opacity="0.25" filter="url(#glassBlur)"/>
+</svg>

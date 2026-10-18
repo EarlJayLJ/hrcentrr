@@ -87,8 +87,11 @@ export interface Message {
   timestamp: string;
   timeAgo: string;
   unread: boolean;
+  readBy?: string[];
   attachmentName?: string;
   attachmentSize?: string;
+  attachmentPath?: string;
+  attachmentMime?: string;
   replyTo?: {
     senderName: string;
     text: string;
@@ -137,6 +140,20 @@ export interface Announcement {
   pinned: boolean;
   isDraft: boolean;
   acknowledgedBy: string[]; // user IDs
+}
+
+export interface NotificationItem {
+  id: string;
+  userId: string;
+  type: 'MESSAGE' | 'TASK_ASSIGNED' | 'TASK_UPDATED' | 'MEETING_REMINDER' | 'ANNOUNCEMENT' | 'CASE_ASSIGNED';
+  title: string;
+  message: string;
+  relatedEntityId?: string;
+  createdAt: string;
+  timeAgo?: string;
+  read: boolean;
+  readAt?: string;
+  actionUrl?: string;
 }
 
 export interface AuditLog {
