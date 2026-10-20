@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import {
+import type {
   User,
   CaseItem,
   Task,
@@ -13,7 +13,7 @@ import {
   AuditLog,
   DashboardData,
   NotificationItem
-} from '../src/types.js';
+} from '../src/types.ts';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'hr_central_database.json');
@@ -1285,16 +1285,21 @@ class StorageManager {
   }
 
   public createDocument(doc: Omit<DocumentItem, 'id' | 'uploadedAt' | 'downloadCount' | 'isArchived'>, actor: string): DocumentItem {
+    const now = new Date();
+    const datePart = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const timePart = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const formattedTimestamp = `${datePart} at ${timePart}`;
+
     const newDoc: DocumentItem = {
       ...doc,
-      id: 'doc_' + Date.now(),
-      uploadedAt: new Date().toISOString().split('T')[0],
+      id: 'doc_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      uploadedAt: formattedTimestamp,
       downloadCount: 0,
       isArchived: false
     };
     this.db.documents.unshift(newDoc);
     this.saveDatabase(this.db);
-    this.logAudit(actor, 'DOCUMENT_UPLOAD', newDoc.name, 'SUCCESS', 'LAN', `${newDoc.fileSize} - ${newDoc.category}`);
+    this.logAudit(actor, 'DOCUMENT_UPLOAD', newDoc.name, 'SUCCESS', 'LAN', `${newDoc.fileSize} - ${newDoc.category} by ${actor}`);
     return newDoc;
   }
 

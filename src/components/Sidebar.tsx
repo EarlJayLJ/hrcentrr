@@ -33,6 +33,7 @@ interface SidebarProps {
   recentConversations: Conversation[];
   onOpenConversation: (convId: string) => void;
   tasksCount: number;
+  documentsCount?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -40,7 +41,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   recentConversations,
   onOpenConversation,
-  tasksCount
+  tasksCount,
+  documentsCount
 }) => {
   const [messagesExpanded, setMessagesExpanded] = useState(true);
 
@@ -74,7 +76,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: 'libraries' as ActiveTab,
       label: 'Documents',
-      icon: Bookmark
+      icon: Bookmark,
+      badge: documentsCount !== undefined && documentsCount > 0 ? documentsCount : undefined
     },
     {
       id: 'reports' as ActiveTab,

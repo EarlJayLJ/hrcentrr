@@ -57,7 +57,7 @@ export default function App() {
     avatarText: 'EE',
     avatarBg: '#006b3f',
     status: 'ACTIVE',
-    department: 'Human Resources Directorate',
+    department: 'Human Resources Director',
     joinedDate: '2022-03-01'
   });
 
@@ -100,6 +100,7 @@ export default function App() {
   const [previewingDoc, setPreviewingDoc] = useState<DocumentItem | null>(null);
   const [modalChangePassword, setModalChangePassword] = useState(false);
   const [modalAdminResetPassword, setModalAdminResetPassword] = useState<User | null>(null);
+  const [showCalendarRailInMessages, setShowCalendarRailInMessages] = useState(false);
 
   // Toast / Status notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -198,9 +199,9 @@ export default function App() {
     });
 
     socket.on('document_uploaded', (doc: DocumentItem) => {
-      setDocuments((prev) => [doc, ...prev]);
+      setDocuments((prev) => [doc, ...prev.filter(d => d.id !== doc.id)]);
       refreshDashboard();
-      showToast(`Document uploaded: ${doc.name}`);
+      showToast(`Document added: ${doc.name} by ${doc.uploadedBy}`);
     });
 
     socket.on('document_archived', ({ id }: { id: string }) => {
@@ -669,7 +670,16 @@ export default function App() {
           return [...prev, newMsg];
         });
 
-        // Refetch conversations list to update unread badge and lastMessage
+        if (newMsg.document) {
+          setDocuments(prev => [newMsg.document, ...prev.filter(d => d.id !== newMsg.document.id)]);
+        }
+
+        // Refetch documents and conversations list to update unread badge and lastMessage
+        fetch('/api/documents', { headers })
+          .then(r => r.json())
+          .then(data => Array.isArray(data) && setDocuments(data))
+          .catch(console.error);
+
         fetch('/api/conversations', { headers })
           .then(r => r.json())
           .then(data => Array.isArray(data) && setConversations(data))
@@ -747,13 +757,23 @@ export default function App() {
   // Document Actions
   const handleUploadDocument = async (formData: FormData) => {
     try {
+      const token = localStorage.getItem('nya_session_id');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        headers['X-Session-ID'] = token;
+      }
       const res = await fetch('/api/documents/upload', {
         method: 'POST',
+        headers,
         body: formData
       });
       if (res.ok) {
-        showToast('Document uploaded to secure archive');
-        fetch('/api/documents').then(r => r.json()).then(setDocuments);
+        const newDoc = await res.json();
+        showToast(`Document uploaded: ${newDoc.name}`);
+        setDocuments(prev => [newDoc, ...prev.filter(d => d.id !== newDoc.id)]);
+        setModalUploadDoc(false);
+        refreshDashboard();
       }
     } catch (err) {
       console.error(err);
@@ -1006,6 +1026,7 @@ export default function App() {
             recentConversations={conversations}
             onOpenConversation={handleSelectConversation}
             tasksCount={tasks.filter(t => t.isMyTask && t.status !== 'COMPLETED').length || 0}
+            documentsCount={documents.length}
           />
 
           {/* Main Content Area - Transparent to show the background image and floating spheres */}
@@ -1047,15 +1068,29 @@ export default function App() {
                 onClearTasks={handleClearTasks}
               />
             ) : activeTab === 'messages' ? (
-              <MessagesView
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                messages={messages}
-                currentUser={currentUser}
-                onSelectConversation={handleSelectConversation}
-                onSendMessage={handleSendMessage}
-                onOpenNewConversation={() => setModalNewConversation(true)}
-              />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <div className="text-xs text-black font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981] animate-pulse"></span>
+                    <span>Direct HR Encrypted Messenger</span>
+                  </div>
+                  <button
+                    onClick={() => setShowCalendarRailInMessages(!showCalendarRailInMessages)}
+                    className="text-xs font-bold px-3 py-1 rounded-xl bg-white/70 hover:bg-white text-black border border-slate-200/80 shadow-xs cursor-pointer transition flex items-center gap-1.5"
+                  >
+                    <span>{showCalendarRailInMessages ? 'Maximize Messages (Hide Rail)' : 'Show Calendar & Tasks Rail'}</span>
+                  </button>
+                </div>
+                <MessagesView
+                  conversations={conversations}
+                  activeConversationId={activeConversationId}
+                  messages={messages}
+                  currentUser={currentUser}
+                  onSelectConversation={handleSelectConversation}
+                  onSendMessage={handleSendMessage}
+                  onOpenNewConversation={() => setModalNewConversation(true)}
+                />
+              </div>
             ) : activeTab === 'libraries' ? (
               <DocumentsView
                 documents={documents}
@@ -1103,31 +1138,33 @@ export default function App() {
             ) : null}
           </main>
 
-          {/* Right Calendar & Task Rail matching reference */}
-          <RightCalendarRail
-            meetings={meetings}
-            myTasks={tasks.filter(t => t.isMyTask)}
-            tasksAssignedToOthers={tasks.filter(t => !t.isMyTask)}
-            isHrHead={currentUser.role === 'HR_ADMIN'}
-            onAddMeeting={() => setModalNewMeeting(true)}
-            onAddMyTask={() => {
-              setModalNewTaskIsMyTask(true);
-              setModalNewTask(true);
-            }}
-            onAddTaskToOthers={() => {
-              setModalNewTaskIsMyTask(false);
-              setModalNewTask(true);
-            }}
-            onToggleTaskStatus={(id) => {
-              const current = tasks.find(t => t.id === id);
-              if (current) {
-                handleUpdateTaskStatus(
-                  id,
-                  current.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED'
-                );
-              }
-            }}
-          />
+          {/* Right Calendar & Task Rail - Sleek full space for messages unless toggled */}
+          {(activeTab !== 'messages' || showCalendarRailInMessages) && (
+            <RightCalendarRail
+              meetings={meetings}
+              myTasks={tasks.filter(t => t.isMyTask)}
+              tasksAssignedToOthers={tasks.filter(t => !t.isMyTask)}
+              isHrHead={currentUser.role === 'HR_ADMIN'}
+              onAddMeeting={() => setModalNewMeeting(true)}
+              onAddMyTask={() => {
+                setModalNewTaskIsMyTask(true);
+                setModalNewTask(true);
+              }}
+              onAddTaskToOthers={() => {
+                setModalNewTaskIsMyTask(false);
+                setModalNewTask(true);
+              }}
+              onToggleTaskStatus={(id) => {
+                const current = tasks.find(t => t.id === id);
+                if (current) {
+                  handleUpdateTaskStatus(
+                    id,
+                    current.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED'
+                  );
+                }
+              }}
+            />
+          )}
         </div>
       </div>
 

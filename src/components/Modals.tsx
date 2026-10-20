@@ -546,11 +546,13 @@ export const UploadDocumentModal: React.FC<{
                 onChange={e => setFolder(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-white/80 text-black border border-white/80 text-black focus:outline-none"
               >
-                <option value="Company Policies">Company Policies</option>
+                <option value="NYA HR Policies & Circulars">NYA HR Policies & Circulars</option>
+                <option value="Messages & Shared Files">Messages & Shared Files</option>
+                <option value="NSP & Youth Corps Postings">NSP & Youth Corps Postings</option>
+                <option value="YLSTI Training Institutes">YLSTI Training Institutes</option>
+                <option value="Civil Service Promotions & Scheme">Civil Service Promotions & Scheme</option>
+                <option value="Legal & Labor Relations">Legal & Labor Relations</option>
                 <option value="Staff Records">Staff Records</option>
-                <option value="Regional Deployments">Regional Deployments</option>
-                <option value="Onboarding Packages">Onboarding Packages</option>
-                <option value="Talent & Training">Talent & Training</option>
               </select>
             </div>
           </div>

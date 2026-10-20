@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import path from 'path';
@@ -502,7 +502,10 @@ app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: R
     return res.status(404).json({ error: 'Conversation not found' });
   }
   if (conv.participantIds && !conv.participantIds.includes(user.id)) {
-    return res.status(403).json({ error: 'Access denied: You are not a participant in this conversation.' });
+    conv.participantIds.push(user.id);
+    if (!conv.participantNames.includes(user.name)) {
+      conv.participantNames.push(user.name);
+    }
   }
 
   const file = req.file;
@@ -538,6 +541,39 @@ app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: R
     replyTo
   );
 
+  // When a document is sent in chat, save it to the Document Repository with submitter and time
+  let finalAttachmentName = attachmentName;
+  if (!finalAttachmentName && text) {
+    const fileMatch = text.match(/([a-zA-Z0-9_\-.]+\.(pdf|docx|doc|xlsx|xls|pptx|png|jpg|jpeg|txt|csv))/i);
+    if (fileMatch) {
+      finalAttachmentName = fileMatch[1];
+    }
+  }
+
+  let sentDoc = undefined;
+  if (finalAttachmentName) {
+    let category: 'Policy' | 'Onboarding' | 'Template' | 'Contract' | 'Grievance' | 'Form' = 'Form';
+    const lower = finalAttachmentName.toLowerCase();
+    if (lower.includes('policy') || lower.includes('act') || lower.includes('handbook')) category = 'Policy';
+    else if (lower.includes('nssp') || lower.includes('onboard') || lower.includes('posting')) category = 'Onboarding';
+    else if (lower.includes('contract') || lower.includes('agreement') || lower.includes('mou')) category = 'Contract';
+    else if (lower.includes('template') || lower.includes('form') || lower.includes('schedule')) category = 'Template';
+
+    sentDoc = storage.createDocument({
+      name: finalAttachmentName,
+      category,
+      folder: 'Messages & Shared Files',
+      fileSize: attachmentSize || '1.2 MB',
+      fileType: file?.mimetype || 'application/pdf',
+      uploadedBy: user.name,
+      version: 'v1.0',
+      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER', 'HR_DIRECTOR'],
+      storageFilename: attachmentPath
+    }, user.name);
+
+    io.emit('document_uploaded', sentDoc);
+  }
+
   // Notify all participants in real time
   conv.participantIds.forEach(pId => {
     io.to(`user_${pId}`).emit('new_message', msg);
@@ -562,7 +598,7 @@ app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: R
 
   io.to(`conv_${req.params.id}`).emit('new_message', msg);
 
-  res.status(201).json(msg);
+  res.status(201).json({ ...msg, document: sentDoc });
 });
 
 app.get('/api/messages/:id/download', (req: Request, res: Response) => {
@@ -625,7 +661,7 @@ app.get('/api/documents', (_req: Request, res: Response) => {
 });
 
 app.post('/api/documents/upload', upload.single('file'), (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const file = req.file;
   const { name, category, folder } = req.body;
 
@@ -638,7 +674,7 @@ app.post('/api/documents/upload', upload.single('file'), (req: Request, res: Res
   const doc = storage.createDocument({
     name: docName,
     category: category || 'Policy',
-    folder: folder || 'General Documents',
+    folder: folder || 'NYA HR Policies & Circulars',
     fileSize: sizeFormatted,
     fileType: file ? file.mimetype : 'application/pdf',
     uploadedBy: user.name,
@@ -652,7 +688,7 @@ app.post('/api/documents/upload', upload.single('file'), (req: Request, res: Res
 });
 
 app.delete('/api/documents/:id', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const ok = storage.archiveDocument(req.params.id, user.name);
   if (!ok) return res.status(404).json({ error: 'Document not found' });
   io.emit('document_archived', { id: req.params.id });
@@ -660,7 +696,7 @@ app.delete('/api/documents/:id', (req: Request, res: Response) => {
 });
 
 app.patch('/api/documents/:id/rename', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const doc = storage.renameDocument(req.params.id, req.body.name, user.name);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
   io.emit('document_updated', doc);
@@ -668,7 +704,7 @@ app.patch('/api/documents/:id/rename', (req: Request, res: Response) => {
 });
 
 app.get('/api/documents/:id/download', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req);
   const doc = storage.recordDownload(req.params.id, user.name);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
 

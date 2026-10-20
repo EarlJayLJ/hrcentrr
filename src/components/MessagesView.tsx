@@ -102,16 +102,16 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
   };
 
   return (
-    <div className="glass-liquid-window rounded-2xl overflow-hidden flex flex-col md:flex-row h-[720px] text-black select-none border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+    <div className="glass-liquid-window rounded-2xl overflow-hidden flex flex-col md:flex-row h-[740px] max-h-[calc(100vh-140px)] text-black select-none border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
       {/* Channels / Conversations List */}
-      <div className="w-full md:w-80 border-r border-slate-200/80 flex flex-col bg-white/40 backdrop-blur-xl">
-        <div className="p-3.5 border-b border-slate-200/80 flex items-center justify-between bg-white/50">
-          <h3 className="text-xs font-bold text-black uppercase tracking-wider">
+      <div className="w-full md:w-72 lg:w-80 shrink-0 border-r border-slate-200/80 flex flex-col bg-white/40 backdrop-blur-xl min-w-0">
+        <div className="p-3.5 border-b border-slate-200/80 flex items-center justify-between bg-white/50 gap-2">
+          <h3 className="text-xs font-bold text-black uppercase tracking-wider truncate">
             Conversations
           </h3>
           <button
             onClick={onOpenNewConversation}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
             title="Start new conversation"
           >
             <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -140,34 +140,34 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               <button
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition text-left cursor-pointer border ${
+                className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl transition text-left cursor-pointer border ${
                   isActive
                     ? 'glass-liquid-nav-active font-bold scale-[1.01]'
                     : 'bg-transparent border-transparent hover:bg-white/80 text-black'
                 }`}
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-black text-xs font-bold shrink-0 shadow-xs ring-1 ring-white/20"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs ring-1 ring-white/40"
                   style={{ backgroundColor: conv.avatarBg || '#7738FF' }}
                 >
                   {conv.avatarText}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold truncate ${isActive ? 'text-black' : 'text-black'}`}>
+                <div className="flex-1 min-w-0 pr-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold truncate flex-1 min-w-0 text-black">
                       {conv.name}
                     </span>
-                    <span className={`text-[10px] font-mono ${isActive ? 'text-black' : 'text-black'}`}>
+                    <span className="text-[10px] font-mono text-slate-700 shrink-0">
                       {conv.lastMessageTime}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-0.5">
-                    <p className={`text-[11px] truncate flex-1 pr-1 ${isActive ? 'text-black' : 'text-black'}`}>
+                  <div className="flex items-center justify-between gap-1.5 mt-0.5">
+                    <p className="text-[11px] truncate flex-1 min-w-0 text-slate-800">
                       {conv.lastMessage}
                     </p>
                     {conv.unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 bg-[#7738FF] text-black font-bold text-[9px] rounded-full shrink-0 shadow-xs">
+                      <span className="px-1.5 py-0.5 bg-[#7738FF] text-white font-bold text-[9px] rounded-full shrink-0 shadow-xs">
                         {conv.unreadCount}
                       </span>
                     )}
@@ -186,73 +186,93 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       </div>
 
       {/* Main Chat Box */}
-      <div className="flex-1 flex flex-col bg-white/20 backdrop-blur-md">
+      <div className="flex-1 flex flex-col bg-white/20 backdrop-blur-md min-w-0">
         {/* Chat Header */}
-        <div className="p-3.5 px-5 border-b border-slate-200/80 flex items-center justify-between bg-white/40 backdrop-blur-md">
-          <div className="flex items-center gap-3">
+        <div className="p-3.5 px-4 sm:px-6 border-b border-slate-200/80 flex items-center justify-between gap-3 bg-white/50 backdrop-blur-md min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-black text-xs font-bold shadow-xs ring-1 ring-white/20"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white/50 shrink-0"
               style={{ backgroundColor: activeConv?.avatarBg || '#7738FF' }}
             >
               {activeConv?.avatarText || 'HR'}
             </div>
-            <div>
-              <div className="text-xs font-bold text-black">
-                {activeConv?.name || 'Department Channel'}
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold text-black truncate flex items-center gap-2">
+                <span className="truncate">{activeConv?.name || 'Department Channel'}</span>
+                {activeConv?.isGroup && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#7738FF]/15 text-[#7738FF] border border-[#7738FF]/30 shrink-0">
+                    Group Channel
+                  </span>
+                )}
               </div>
-              <div className="text-[10px] text-[#7738FF] font-medium">
+              <div 
+                className="text-[11px] text-slate-700 font-semibold truncate mt-0.5" 
+                title={activeConv?.participantNames?.join(', ')}
+              >
                 {activeConv?.isGroup
-                  ? `${activeConv.participantNames.length} participants (Department Group)`
-                  : 'Direct Local LAN Channel'}
+                  ? `Members: ${activeConv.participantNames.join(', ')}`
+                  : 'Direct Local LAN Channel · Real-time Online'}
               </div>
             </div>
           </div>
 
           {/* Search inside active chat */}
-          <div className="relative hidden sm:block">
+          <div className="relative shrink-0">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
             <input
               type="text"
               value={chatSearch}
               onChange={(e) => setChatSearch(e.target.value)}
-              placeholder="Search in chat..."
-              className="pl-8 pr-3 py-1 text-xs bg-white/70 focus:bg-white text-black placeholder-slate-400 rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-48 transition"
+              placeholder="Search chat..."
+              className="pl-8 pr-3 py-1 text-xs bg-white/80 focus:bg-white text-black placeholder-slate-500 rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-32 sm:w-44 focus:w-56 transition-all shadow-xs"
             />
           </div>
         </div>
 
         {/* Messages Stream */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {filteredMessages.map((msg) => {
             const isMe = msg.senderId === currentUser.id;
             return (
               <div
                 key={msg.id}
-                className={`flex gap-2.5 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+                className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
               >
-                {!isMe && (
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-black text-[10px] font-bold shrink-0 mt-0.5 shadow-xs ring-1 ring-white/20"
-                    style={{ backgroundColor: msg.senderBg || '#7738FF' }}
-                  >
-                    {msg.senderInitials}
-                  </div>
-                )}
+                {/* Sender Avatar */}
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-xs ring-2 ring-white/50 mb-0.5"
+                  style={{ backgroundColor: isMe ? '#7738FF' : (msg.senderBg || '#4F46E5') }}
+                  title={isMe ? `${currentUser.name} (You)` : msg.senderName}
+                >
+                  {isMe 
+                    ? (currentUser.name ? currentUser.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('') : 'ME') 
+                    : msg.senderInitials}
+                </div>
 
                 <div
-                  className={`max-w-[80%] rounded-2xl p-3 text-xs shadow-xs ${
+                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-3.5 text-xs shadow-sm min-w-0 ${
                     isMe
-                      ? 'bg-gradient-to-r from-[#7738FF] to-[#9A75FF] text-black rounded-tr-xs shadow-md border border-white/20'
-                      : 'bg-white/85 backdrop-blur-md border border-white/90 text-black shadow-xs rounded-tl-xs shadow-xs'
+                      ? 'bg-gradient-to-r from-[#7738FF] to-[#9A75FF] text-white rounded-br-xs shadow-md border border-white/20'
+                      : 'bg-white/95 backdrop-blur-md border border-white/90 text-black shadow-xs rounded-bl-xs'
                   }`}
                 >
+                  {/* Sender Header Name & Timestamp clearly positioned with no cutoff */}
+                  <div className="flex items-center justify-between gap-3 mb-1.5 pb-1 border-b border-black/10">
+                    <span className={`font-bold text-[11px] truncate ${isMe ? 'text-white' : 'text-[#7738FF]'}`}>
+                      {isMe ? `${currentUser.name} (You)` : msg.senderName}
+                    </span>
+                    <span className={`text-[10px] font-mono shrink-0 ${isMe ? 'text-violet-100' : 'text-slate-600'}`}>
+                      {msg.timeAgo}
+                    </span>
+                  </div>
+
                   {/* Reply preview */}
                   {msg.replyTo && (
                     <div
                       className={`mb-2 p-1.5 rounded-lg text-[10px] border-l-2 ${
                         isMe
-                          ? 'bg-white/20 border-violet-200 text-black'
-                          : 'bg-slate-100 border-[#7738FF] text-[#7738FF]'
+                          ? 'bg-white/20 border-white text-white'
+                          : 'bg-slate-100 border-[#7738FF] text-slate-800'
                       }`}
                     >
                       <span className="font-bold">{msg.replyTo.senderName}:</span>{' '}
@@ -260,54 +280,45 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                     </div>
                   )}
 
-                  {!isMe && (
-                    <div className="text-[10px] font-bold text-[#7738FF] mb-1">
-                      {msg.senderName}
-                    </div>
-                  )}
-
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
 
                   {/* Attachment if any */}
                   {msg.attachmentName && (
                     <div
                       className={`mt-2.5 p-2.5 rounded-xl flex items-center justify-between gap-3 text-[11px] font-semibold border ${
                         isMe
-                          ? 'bg-white/20 text-black border-white/30'
-                          : 'bg-white/80 text-black border-slate-200/80'
+                          ? 'bg-white/20 text-white border-white/30'
+                          : 'bg-slate-50 text-black border-slate-200'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <FileText className={`w-4 h-4 shrink-0 ${isMe ? 'text-black' : 'text-[#7738FF]'}`} />
+                        <FileText className={`w-4 h-4 shrink-0 ${isMe ? 'text-white' : 'text-[#7738FF]'}`} />
                         <span className="truncate font-medium">{msg.attachmentName}</span>
                       </div>
                       <a
                         href={`/api/messages/${msg.id}/download`}
                         download={msg.attachmentName}
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shrink-0 cursor-pointer bg-[#7738FF] hover:bg-[#8B5CF6] text-black shadow-xs"
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shrink-0 cursor-pointer bg-white hover:bg-slate-100 text-black shadow-xs"
                         title="Download Attached File"
                       >
-                        <Download className="w-3 h-3" />
+                        <Download className="w-3 h-3 text-[#7738FF]" />
                         <span>Download</span>
                       </a>
                     </div>
                   )}
 
-                  <div
-                    className={`mt-1 flex items-center justify-end gap-1 text-[9px] ${
-                      isMe ? 'text-violet-200' : 'text-black'
-                    }`}
-                  >
-                    <span className="font-mono">{msg.timeAgo}</span>
-                    {isMe && <CheckCheck className="w-3 h-3 text-violet-200" />}
-                  </div>
+                  {isMe && (
+                    <div className="mt-1 flex items-center justify-end gap-1 text-[9px] text-violet-100">
+                      <CheckCheck className="w-3 h-3" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Reply trigger button */}
                 <button
                   onClick={() => setReplyTarget(msg)}
-                  className="opacity-0 hover:opacity-100 text-black hover:text-black self-center transition cursor-pointer p-1"
+                  className="opacity-40 hover:opacity-100 text-black hover:text-[#7738FF] self-center transition cursor-pointer p-1.5 rounded-lg hover:bg-white/60"
                   title="Reply"
                 >
                   <Reply className="w-3.5 h-3.5" />

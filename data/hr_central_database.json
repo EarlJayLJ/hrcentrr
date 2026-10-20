@@ -1,0 +1,1205 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Ekow Eshun",
+      "email": "ekow.eshun@nya.gov.gh",
+      "username": "ekow.eshun",
+      "role": "HR_ADMIN",
+      "roleTitle": "HEAD OF HR & OPERATIONS",
+      "avatarText": "EE",
+      "avatarBg": "#006b3f",
+      "status": "ACTIVE",
+      "department": "Human Resources Directorate",
+      "joinedDate": "2022-03-01",
+      "passwordHash": "48eed5e070ba99de0de1e11cacbd19fb57c656372b30175789075ab1fc88eaafffa07b2ac66a09d0baf0d58be0ed9d8f6325ad4574c02e2efadf918dce4e7156",
+      "passwordSalt": "31c54106346b405defde5ba2f303a52e",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u2",
+      "name": "Akosua Frimpong",
+      "email": "a.frimpong@nya.gov.gh",
+      "username": "a.frimpong",
+      "role": "HR_MANAGER",
+      "roleTitle": "Principal HR Officer",
+      "avatarText": "AF",
+      "avatarBg": "#0ea5e9",
+      "status": "ACTIVE",
+      "department": "Talent & Youth Development",
+      "joinedDate": "2021-08-15",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u3",
+      "name": "Kwabena Osei",
+      "email": "k.osei@nya.gov.gh",
+      "username": "k.osei",
+      "role": "HR_SPECIALIST",
+      "roleTitle": "Regional HR Coordinator",
+      "avatarText": "KO",
+      "avatarBg": "#8b5cf6",
+      "status": "ACTIVE",
+      "department": "Regional Operations Directorate",
+      "joinedDate": "2023-01-10",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u4",
+      "name": "Miss Gloria",
+      "email": "miss.gloria@nya.gov.gh",
+      "username": "miss.gloria",
+      "role": "HR_OFFICER",
+      "roleTitle": "Senior Personnel Officer",
+      "avatarText": "MG",
+      "avatarBg": "#ec4899",
+      "status": "ACTIVE",
+      "department": "Staff Welfare & NSSP Coordination",
+      "joinedDate": "2024-02-01",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u5",
+      "name": "Kofi Boateng",
+      "email": "k.boateng@nya.gov.gh",
+      "username": "k.boateng",
+      "role": "HR_SPECIALIST",
+      "roleTitle": "Vocational Training Lead",
+      "avatarText": "KB",
+      "avatarBg": "#10b981",
+      "status": "ACTIVE",
+      "department": "YLSTI Training Centers",
+      "joinedDate": "2022-11-20",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u6",
+      "name": "Hajia Amina Fuseini",
+      "email": "a.fuseini@nya.gov.gh",
+      "username": "a.fuseini",
+      "role": "HR_DIRECTOR",
+      "roleTitle": "Staff & Labor Relations Lead",
+      "avatarText": "AF",
+      "avatarBg": "#f59e0b",
+      "status": "ACTIVE",
+      "department": "Employee Relations Directorate",
+      "joinedDate": "2020-07-15",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    },
+    {
+      "id": "u7",
+      "name": "Dr. Emmanuel Mensah",
+      "email": "e.mensah@nya.gov.gh",
+      "username": "e.mensah",
+      "role": "HR_MANAGER",
+      "roleTitle": "Director of Administration",
+      "avatarText": "EM",
+      "avatarBg": "#6366f1",
+      "status": "ACTIVE",
+      "department": "Executive Secretariat",
+      "joinedDate": "2019-05-10",
+      "passwordHash": "8eae2d27dc8706db3cc4183559907f35186d6e2fce160fc00ce9c639f0489bb933b72d86c502c0bdb70f675e10d0b59f45d5231fb996a83a8e98b8085c7574b4",
+      "passwordSalt": "ca6cff9e9a63c60efc317dfefcadcf40",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "mustChangePassword": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "c1",
+      "name": "NSSP 2026/2027 Cohort Deployment & Regional Postings",
+      "caseNumber": "NYA-HR-2026-081",
+      "category": "Postings & Deployment",
+      "dates": "May 18, 2024 - May 25, 2024",
+      "priority": "Low",
+      "attachment": {
+        "name": "NSSP_Posting_Schedule_2026.doc",
+        "size": "1.4 MB"
+      },
+      "assignee": {
+        "id": "u3",
+        "name": "Kwabena Osei",
+        "initials": "KO",
+        "color": "#8b5cf6"
+      },
+      "status": "PENDING_ACCEPTANCE",
+      "description": "Orientation, station allotment, and mentorship deployment of 140 National Service personnel to 16 NYA regional secretariats.",
+      "department": "Regional Operations",
+      "country": "Greater Accra",
+      "createdDate": "2024-05-18"
+    },
+    {
+      "id": "c2",
+      "name": "YLSTI Instructor Staffing Review - Afienya & Ajumako Centers",
+      "caseNumber": "NYA-HR-2024-082",
+      "category": "Training & Skills",
+      "dates": "May 18, 2024 - May 25, 2024",
+      "priority": "Medium",
+      "attachment": {
+        "name": "YLSTI_Staffing_Assessment.doc",
+        "size": "2.8 MB"
+      },
+      "assignee": {
+        "id": "u1",
+        "name": "Ekow Eshun",
+        "initials": "EE",
+        "color": "#006b3f"
+      },
+      "status": "PENDING_ACCEPTANCE",
+      "description": "Comprehensive audit of technical instructors and vocational training facilitators across 11 Youth Leadership and Skills Training Institutes.",
+      "department": "Vocational Training",
+      "country": "Ashanti",
+      "createdDate": "2024-05-18"
+    },
+    {
+      "id": "c3",
+      "name": "Civil Service Annual Promotion & PSC Evaluation Benchmarks",
+      "caseNumber": "NYA-HR-2024-083",
+      "category": "Promotions",
+      "dates": "May 20, 2024 - Jun 02, 2024",
+      "priority": "Low",
+      "attachment": {
+        "name": "PSC_Promotion_Dossier_2026.doc",
+        "size": "4.1 MB"
+      },
+      "assignee": {
+        "id": "u2",
+        "name": "Akosua Frimpong",
+        "initials": "AF",
+        "color": "#0ea5e9"
+      },
+      "status": "PENDING_ACCEPTANCE",
+      "description": "Verification of eligible Senior Youth Officers submitted to the Public Services Commission (PSC) for promotion interviews.",
+      "department": "People & Culture",
+      "country": "Western",
+      "createdDate": "2024-05-20"
+    },
+    {
+      "id": "c4",
+      "name": "Staff Health Scheme & Welfare Allowance Review",
+      "caseNumber": "NYA-HR-2024-084",
+      "category": "Staff Welfare",
+      "dates": "May 22, 2024 - May 30, 2024",
+      "priority": "High",
+      "attachment": {
+        "name": "Welfare_Fund_Statement_Q2.xlsx",
+        "size": "890 KB"
+      },
+      "assignee": {
+        "id": "u4",
+        "name": "Miss Gloria",
+        "initials": "MG",
+        "color": "#ec4899"
+      },
+      "status": "IN_PROGRESS",
+      "description": "Restructuring of regional staff health insurance supplementary scheme and maternity support provisions.",
+      "department": "Staff Welfare",
+      "country": "Eastern",
+      "createdDate": "2024-05-22"
+    },
+    {
+      "id": "c5",
+      "name": "Ghana Labour Act (Act 651) Internal Policy Alignment",
+      "caseNumber": "NYA-HR-2024-085",
+      "category": "Policy & Compliance",
+      "dates": "May 24, 2024 - Jun 05, 2024",
+      "priority": "Medium",
+      "attachment": {
+        "name": "Labour_Act_651_Compliance_Brief.pdf",
+        "size": "720 KB"
+      },
+      "assignee": {
+        "id": "u6",
+        "name": "Hajia Amina Fuseini",
+        "initials": "AF",
+        "color": "#f59e0b"
+      },
+      "status": "IN_PROGRESS",
+      "description": "Harmonization of internal grievance procedures with National Youth Authority Act (Act 939) and Ghana Public Services standards.",
+      "department": "Legal Affairs",
+      "country": "Northern",
+      "createdDate": "2024-05-24"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "NSS PERSONEL PROFILE",
+      "description": "SUBMIT IT FAST",
+      "priority": "Low",
+      "status": "COMPLETED",
+      "dueDate": "OCT 25, 2026",
+      "assigneeId": "u2",
+      "assigneeName": "Akosua Frimpong",
+      "category": "Operations",
+      "isMyTask": false,
+      "creatorId": "u1",
+      "creatorName": "Ekow Eshun",
+      "id": "t_1792407392873",
+      "createdAt": "2026-10-19",
+      "commentsCount": 0
+    },
+    {
+      "title": "GO FOR LUNCH",
+      "description": "BUY FUFU",
+      "priority": "Low",
+      "status": "PENDING",
+      "dueDate": "OCT 25, 2026",
+      "assigneeId": "u1",
+      "assigneeName": "Ekow Eshun",
+      "category": "Operations",
+      "isMyTask": true,
+      "creatorId": "u1",
+      "creatorName": "Ekow Eshun",
+      "id": "t_1792407180737",
+      "createdAt": "2026-10-19",
+      "commentsCount": 0
+    }
+  ],
+  "meetings": [],
+  "notifications": [
+    {
+      "userId": "u2",
+      "type": "MESSAGE",
+      "title": "New Message from Ekow Eshun",
+      "message": "Here is the new deployment memo for review",
+      "relatedEntityId": "conv1",
+      "actionUrl": "/messages",
+      "id": "notif_1792408134063_621",
+      "createdAt": "2026-10-19T11:08:54.063Z",
+      "read": false
+    },
+    {
+      "userId": "u2",
+      "type": "MESSAGE",
+      "title": "New Message from Ekow Eshun",
+      "message": "THANK YOU MISS AKOSUA",
+      "relatedEntityId": "conv1",
+      "actionUrl": "/messages",
+      "id": "notif_1792407444389_256",
+      "createdAt": "2026-10-19T10:57:24.389Z",
+      "read": false
+    },
+    {
+      "userId": "u2",
+      "type": "TASK_ASSIGNED",
+      "title": "New Assigned Task",
+      "message": "Ekow Eshun assigned task: NSS PERSONEL PROFILE",
+      "relatedEntityId": "t_1792407392873",
+      "actionUrl": "/tasks",
+      "id": "notif_1792407392874_926",
+      "createdAt": "2026-10-19T10:56:32.874Z",
+      "read": false
+    },
+    {
+      "userId": "u1",
+      "type": "MESSAGE",
+      "title": "New Message from Akosua Frimpong",
+      "message": "HELLO SIR HERE IS THE NSS FILE",
+      "relatedEntityId": "conv1",
+      "actionUrl": "/messages",
+      "id": "notif_1792407331578_35",
+      "createdAt": "2026-10-19T10:55:31.578Z",
+      "read": false
+    },
+    {
+      "userId": "u7",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225574_234",
+      "createdAt": "2026-10-19T10:53:45.574Z",
+      "read": false
+    },
+    {
+      "userId": "u6",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225574_136",
+      "createdAt": "2026-10-19T10:53:45.574Z",
+      "read": false
+    },
+    {
+      "userId": "u5",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225574_759",
+      "createdAt": "2026-10-19T10:53:45.574Z",
+      "read": false
+    },
+    {
+      "userId": "u4",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225574_831",
+      "createdAt": "2026-10-19T10:53:45.574Z",
+      "read": false
+    },
+    {
+      "userId": "u3",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225573_699",
+      "createdAt": "2026-10-19T10:53:45.573Z",
+      "read": false
+    },
+    {
+      "userId": "u2",
+      "type": "MEETING_REMINDER",
+      "title": "New Meeting Scheduled",
+      "message": "MEETING TODAY on 2024-05-18 at 09:00AM",
+      "relatedEntityId": "m_1792407225572",
+      "actionUrl": "/meetings",
+      "id": "notif_1792407225573_811",
+      "createdAt": "2026-10-19T10:53:45.573Z",
+      "read": false
+    },
+    {
+      "userId": "u4",
+      "type": "TASK_ASSIGNED",
+      "title": "New Assigned Task",
+      "message": "Ekow Eshun assigned task: NSS PERSONELS PROFILE",
+      "relatedEntityId": "t_1792407066672",
+      "actionUrl": "/tasks",
+      "id": "notif_1792407066672_81",
+      "createdAt": "2026-10-19T10:51:06.672Z",
+      "read": false
+    },
+    {
+      "userId": "u1",
+      "type": "MESSAGE",
+      "title": "New Message from Akosua Frimpong",
+      "message": "good morning",
+      "relatedEntityId": "conv1",
+      "actionUrl": "/messages",
+      "id": "notif_1792406761936_664",
+      "createdAt": "2026-10-19T10:46:01.936Z",
+      "read": false
+    },
+    {
+      "userId": "u2",
+      "type": "MESSAGE",
+      "title": "New Message from Ekow Eshun",
+      "message": "hello sir",
+      "relatedEntityId": "conv1",
+      "actionUrl": "/messages",
+      "id": "notif_1792406732388_463",
+      "createdAt": "2026-10-19T10:45:32.388Z",
+      "read": false
+    },
+    {
+      "id": "n1",
+      "userId": "u4",
+      "type": "TASK_ASSIGNED",
+      "title": "New Assigned Task",
+      "message": "Ekow Eshun assigned task: Audit Regional Welfare Health Subscriptions",
+      "relatedEntityId": "t2",
+      "createdAt": "2026-10-19T09:44:05.401Z",
+      "read": false,
+      "actionUrl": "/tasks"
+    },
+    {
+      "id": "n2",
+      "userId": "u4",
+      "type": "MESSAGE",
+      "title": "New Message from Ekow Eshun",
+      "message": "Please ensure all regional health scheme claims are reconciled before Friday.",
+      "relatedEntityId": "conv3",
+      "createdAt": "2026-10-19T08:44:05.401Z",
+      "read": false,
+      "actionUrl": "/messages"
+    },
+    {
+      "id": "n3",
+      "userId": "u1",
+      "type": "ANNOUNCEMENT",
+      "title": "Official Circular Published",
+      "message": "Submission of Annual PSC Staff Performance Appraisals",
+      "relatedEntityId": "ann1",
+      "createdAt": "2026-10-18T10:44:05.401Z",
+      "read": true,
+      "actionUrl": "/announcements"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "conv1",
+      "name": "Akosua Frimpong",
+      "isGroup": false,
+      "participantIds": [
+        "u1",
+        "u2"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Akosua Frimpong"
+      ],
+      "lastMessage": "Here is the new deployment memo for review",
+      "lastMessageTime": "Just now",
+      "unreadCount": 1,
+      "avatarText": "AF",
+      "avatarBg": "#0ea5e9"
+    },
+    {
+      "id": "conv2",
+      "name": "Kwabena Osei",
+      "isGroup": false,
+      "participantIds": [
+        "u1",
+        "u3"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Kwabena Osei"
+      ],
+      "lastMessage": "All district youth officer postings for Ashanti region have been submitted for review.",
+      "lastMessageTime": "5 days ago",
+      "unreadCount": 1,
+      "avatarText": "KO",
+      "avatarBg": "#8b5cf6"
+    },
+    {
+      "id": "conv3",
+      "name": "Miss Gloria",
+      "isGroup": false,
+      "participantIds": [
+        "u1",
+        "u4"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Miss Gloria"
+      ],
+      "lastMessage": "NSSP orientation materials are fully printed and ready for distribution.",
+      "lastMessageTime": "1 hour ago",
+      "unreadCount": 0,
+      "avatarText": "MG",
+      "avatarBg": "#ec4899"
+    },
+    {
+      "id": "conv4",
+      "name": "Kofi Boateng",
+      "isGroup": false,
+      "participantIds": [
+        "u1",
+        "u5"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Kofi Boateng"
+      ],
+      "lastMessage": "Afienya center instructors have completed their COTVET skill evaluations.",
+      "lastMessageTime": "Yesterday",
+      "unreadCount": 0,
+      "avatarText": "KB",
+      "avatarBg": "#10b981"
+    },
+    {
+      "id": "conv5",
+      "name": "Hajia Amina Fuseini",
+      "isGroup": false,
+      "participantIds": [
+        "u1",
+        "u6"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Hajia Amina Fuseini"
+      ],
+      "lastMessage": "The legal review of our updated Scheme of Service is complete.",
+      "lastMessageTime": "3 days ago",
+      "unreadCount": 0,
+      "avatarText": "AF",
+      "avatarBg": "#f59e0b"
+    },
+    {
+      "id": "conv_group1",
+      "name": "NYA HR Directorate Executive Team",
+      "isGroup": true,
+      "participantIds": [
+        "u1",
+        "u2",
+        "u3",
+        "u4",
+        "u5",
+        "u6",
+        "u7"
+      ],
+      "participantNames": [
+        "Ekow Eshun",
+        "Akosua Frimpong",
+        "Kwabena Osei",
+        "Miss Gloria",
+        "Kofi Boateng",
+        "Hajia Amina Fuseini",
+        "Dr. Emmanuel Mensah"
+      ],
+      "lastMessage": "All regional deployment schedules are approved. Review commences Friday.",
+      "lastMessageTime": "4 hours ago",
+      "unreadCount": 0,
+      "avatarText": "NYA",
+      "avatarBg": "#006b3f"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg1",
+      "conversationId": "conv1",
+      "senderId": "u2",
+      "senderName": "Akosua Frimpong",
+      "senderInitials": "AF",
+      "senderBg": "#0ea5e9",
+      "text": "Good morning Ekow, the Public Services Commission has confirmed the promotion interview dates for our Senior Youth Officers. All candidate dossiers are indexed in the repository.",
+      "timestamp": "2024-05-14T10:15:00Z",
+      "timeAgo": "2 days ago",
+      "unread": false,
+      "readBy": [
+        "u1"
+      ]
+    },
+    {
+      "id": "msg2",
+      "conversationId": "conv2",
+      "senderId": "u3",
+      "senderName": "Kwabena Osei",
+      "senderInitials": "KO",
+      "senderBg": "#8b5cf6",
+      "text": "Greetings Director, the Ashanti and Western regional secretariats have confirmed receipt of their NSSP cohort quotas. We are preparing the regional orientation itinerary.",
+      "timestamp": "2024-05-11T14:40:00Z",
+      "timeAgo": "5 days ago",
+      "unread": true
+    },
+    {
+      "id": "msg3",
+      "conversationId": "conv3",
+      "senderId": "u4",
+      "senderName": "Miss Gloria",
+      "senderInitials": "MG",
+      "senderBg": "#ec4899",
+      "text": "Hello Ekow, the welfare allowance calculations for Q2 have been finalized per the latest civil service circular.",
+      "timestamp": "2024-05-16T08:00:00Z",
+      "timeAgo": "2 hours ago",
+      "unread": false
+    },
+    {
+      "id": "msg4",
+      "conversationId": "conv3",
+      "senderId": "u1",
+      "senderName": "Ekow Eshun",
+      "senderInitials": "EE",
+      "senderBg": "#006b3f",
+      "text": "Thank you Gloria. Please ensure all regional health scheme claims are reconciled before Friday.",
+      "timestamp": "2024-05-16T08:20:00Z",
+      "timeAgo": "1 hour ago",
+      "unread": false
+    },
+    {
+      "id": "msg5",
+      "conversationId": "conv_group1",
+      "senderId": "u7",
+      "senderName": "Dr. Emmanuel Mensah",
+      "senderInitials": "EM",
+      "senderBg": "#6366f1",
+      "text": "Colleagues, let us ensure all quarterly HR indicators are submitted ahead of the National Youth Authority Governing Board sitting.",
+      "timestamp": "2024-05-16T09:00:00Z",
+      "timeAgo": "4 hours ago",
+      "unread": false
+    },
+    {
+      "id": "msg_1792406732386_638",
+      "conversationId": "conv1",
+      "senderId": "u1",
+      "senderName": "Ekow Eshun",
+      "senderInitials": "EE",
+      "senderBg": "#006b3f",
+      "text": "hello sir",
+      "timestamp": "2026-10-19T10:45:32.386Z",
+      "timeAgo": "Just now",
+      "unread": false,
+      "readBy": [
+        "u1",
+        "u2"
+      ]
+    },
+    {
+      "id": "msg_1792406761935_416",
+      "conversationId": "conv1",
+      "senderId": "u2",
+      "senderName": "Akosua Frimpong",
+      "senderInitials": "AF",
+      "senderBg": "#0ea5e9",
+      "text": "good morning",
+      "timestamp": "2026-10-19T10:46:01.935Z",
+      "timeAgo": "Just now",
+      "unread": false,
+      "readBy": [
+        "u2",
+        "u1"
+      ]
+    },
+    {
+      "id": "msg_1792407331577_223",
+      "conversationId": "conv1",
+      "senderId": "u2",
+      "senderName": "Akosua Frimpong",
+      "senderInitials": "AF",
+      "senderBg": "#0ea5e9",
+      "text": "HELLO SIR HERE IS THE NSS FILE",
+      "timestamp": "2026-10-19T10:55:31.577Z",
+      "timeAgo": "Just now",
+      "unread": false,
+      "readBy": [
+        "u2",
+        "u1"
+      ],
+      "attachmentName": "NYA.txt",
+      "attachmentPath": "1792407331572_NYA.txt",
+      "attachmentSize": "0 KB",
+      "attachmentMime": "text/plain"
+    },
+    {
+      "id": "msg_1792407444388_278",
+      "conversationId": "conv1",
+      "senderId": "u1",
+      "senderName": "Ekow Eshun",
+      "senderInitials": "EE",
+      "senderBg": "#006b3f",
+      "text": "THANK YOU MISS AKOSUA",
+      "timestamp": "2026-10-19T10:57:24.388Z",
+      "timeAgo": "Just now",
+      "unread": false,
+      "readBy": [
+        "u1",
+        "u2"
+      ]
+    },
+    {
+      "id": "msg_1792408134050_519",
+      "conversationId": "conv1",
+      "senderId": "u1",
+      "senderName": "Ekow Eshun",
+      "senderInitials": "EE",
+      "senderBg": "#006b3f",
+      "text": "Here is the new deployment memo for review",
+      "timestamp": "2026-10-19T11:08:54.050Z",
+      "timeAgo": "Just now",
+      "unread": true,
+      "readBy": [
+        "u1"
+      ],
+      "attachmentName": "Q4_Regional_Deployment_Memo.pdf"
+    }
+  ],
+  "documents": [
+    {
+      "name": "Q4_Regional_Deployment_Memo.pdf",
+      "category": "Form",
+      "folder": "Messages & Shared Files",
+      "fileSize": "1.2 MB",
+      "fileType": "application/pdf",
+      "uploadedBy": "Ekow Eshun",
+      "version": "v1.0",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_OFFICER",
+        "HR_DIRECTOR"
+      ],
+      "id": "doc_1792408134059_76",
+      "uploadedAt": "19 Oct 2026 at 11:08 AM",
+      "downloadCount": 1,
+      "isArchived": false
+    },
+    {
+      "id": "doc1",
+      "name": "NYA_Scheme_of_Service_and_Staff_Handbook_Act939.pdf",
+      "category": "Policy",
+      "folder": "Statutory Regulations",
+      "fileSize": "3.8 MB",
+      "fileType": "application/pdf",
+      "uploadedBy": "Dr. Emmanuel Mensah",
+      "uploadedAt": "15 Jan 2024 at 09:15 AM",
+      "version": "v2026.1",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_OFFICER",
+        "HR_DIRECTOR"
+      ],
+      "downloadCount": 142,
+      "isArchived": false
+    },
+    {
+      "id": "doc2",
+      "name": "Ghana_Labour_Act_651_Compliance_Manual.pdf",
+      "category": "Policy",
+      "folder": "Statutory Regulations",
+      "fileSize": "2.4 MB",
+      "fileType": "application/pdf",
+      "uploadedBy": "Hajia Amina Fuseini",
+      "uploadedAt": "10 Feb 2024 at 10:30 AM",
+      "version": "v3.2",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_DIRECTOR"
+      ],
+      "downloadCount": 88,
+      "isArchived": false
+    },
+    {
+      "id": "doc3",
+      "name": "NSSP_Deployment_and_Mentorship_Guide_2026.docx",
+      "category": "Onboarding",
+      "folder": "National Service Personnel",
+      "fileSize": "1.2 MB",
+      "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "uploadedBy": "Miss Gloria",
+      "uploadedAt": "18 May 2024 at 11:45 AM",
+      "version": "v1.4",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_OFFICER"
+      ],
+      "downloadCount": 65,
+      "isArchived": false
+    },
+    {
+      "id": "doc4",
+      "name": "YLSTI_Vocational_Staff_Deployment_Schedule.xlsx",
+      "category": "Template",
+      "folder": "Vocational Training Institutes",
+      "fileSize": "950 KB",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "uploadedBy": "Kofi Boateng",
+      "uploadedAt": "5 Apr 2024 at 01:20 PM",
+      "version": "v2.0",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST"
+      ],
+      "downloadCount": 34,
+      "isArchived": false
+    },
+    {
+      "id": "doc5",
+      "name": "Public_Services_Commission_Promotion_Guidelines.pdf",
+      "category": "Policy",
+      "folder": "Promotions & Evaluations",
+      "fileSize": "2.1 MB",
+      "fileType": "application/pdf",
+      "uploadedBy": "Akosua Frimpong",
+      "uploadedAt": "12 Mar 2024 at 02:40 PM",
+      "version": "v1.1",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_DIRECTOR"
+      ],
+      "downloadCount": 52,
+      "isArchived": false
+    },
+    {
+      "id": "doc6",
+      "name": "Staff_Medical_Welfare_Policy_NYA.pdf",
+      "category": "Policy",
+      "folder": "Staff Welfare & Healthcare",
+      "fileSize": "1.6 MB",
+      "fileType": "application/pdf",
+      "uploadedBy": "Miss Gloria",
+      "uploadedAt": "25 Mar 2024 at 04:10 PM",
+      "version": "v2.2",
+      "accessRole": [
+        "HR_ADMIN",
+        "HR_MANAGER",
+        "HR_SPECIALIST",
+        "HR_OFFICER"
+      ],
+      "downloadCount": 77,
+      "isArchived": false
+    }
+  ],
+  "announcements": [
+    {
+      "title": "BREAST CANCER WEEK CELEBRATION",
+      "content": "COME FOR BREAST CHECK",
+      "category": "General",
+      "priority": "High",
+      "pinned": false,
+      "isDraft": false,
+      "expiryDate": "2026-12-31",
+      "authorName": "Akosua Frimpong",
+      "authorRole": "Principal HR Officer",
+      "id": "ann_1792407514749",
+      "publishedAt": "2026-10-19",
+      "acknowledgedBy": [
+        "u1"
+      ]
+    },
+    {
+      "id": "ann1",
+      "title": "Submission of Annual PSC Staff Performance Appraisals (SPER Form A)",
+      "content": "All Regional Directors, District Youth Coordinators, and Unit Heads must submit completed staff performance evaluation forms for the 2025/2026 assessment year to the HR Directorate by May 31.",
+      "category": "Policy Update",
+      "priority": "High",
+      "authorName": "Ekow Eshun",
+      "authorRole": "Head of HR & Operations",
+      "publishedAt": "2024-05-15",
+      "expiryDate": "2024-05-31",
+      "pinned": true,
+      "isDraft": false,
+      "acknowledgedBy": [
+        "u1",
+        "u2",
+        "u3"
+      ]
+    },
+    {
+      "id": "ann2",
+      "title": "Deployment Notice: 2026/2027 National Service Personnel to NYA Secretariats",
+      "content": "Official postings of newly assigned National Service Personnel to the Accra Head Office, Regional Secretariats, and YLSTI Vocational Training Institutes have been finalized and uploaded to the Document Repository.",
+      "category": "General",
+      "priority": "Medium",
+      "authorName": "Miss Gloria",
+      "authorRole": "Senior Personnel Officer",
+      "publishedAt": "2024-05-12",
+      "expiryDate": "2024-06-30",
+      "pinned": true,
+      "isDraft": false,
+      "acknowledgedBy": [
+        "u1",
+        "u3",
+        "u4"
+      ]
+    },
+    {
+      "id": "ann3",
+      "title": "Special Capacity Building Workshop at National Youth Leadership Institute",
+      "content": "A 3-day supervisory and youth project management workshop will be hosted at the Afienya Youth Institute for newly appointed District Youth Officers. Registration is open via HR.",
+      "category": "Benefits",
+      "priority": "Low",
+      "authorName": "Kofi Boateng",
+      "authorRole": "Vocational Training Lead",
+      "publishedAt": "2024-05-10",
+      "pinned": false,
+      "isDraft": false,
+      "acknowledgedBy": [
+        "u1"
+      ]
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log_1792408143310_32",
+      "actor": "Ekow Eshun",
+      "action": "DOCUMENT_DOWNLOAD",
+      "target": "Q4_Regional_Deployment_Memo.pdf",
+      "timestamp": "2026-10-19T11:09:03.310Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN"
+    },
+    {
+      "id": "log_1792408134060_432",
+      "actor": "Ekow Eshun",
+      "action": "DOCUMENT_UPLOAD",
+      "target": "Q4_Regional_Deployment_Memo.pdf",
+      "timestamp": "2026-10-19T11:08:54.060Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "1.2 MB - Form by Ekow Eshun"
+    },
+    {
+      "id": "log_1792407523077_503",
+      "actor": "Ekow Eshun",
+      "action": "SWITCH_USER",
+      "target": "ekow.eshun@nya.gov.gh",
+      "timestamp": "2026-10-19T10:58:43.077Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to HEAD OF HR & OPERATIONS"
+    },
+    {
+      "id": "log_1792407514750_793",
+      "actor": "Akosua Frimpong",
+      "action": "ANNOUNCEMENT_PUBLISH",
+      "target": "BREAST CANCER WEEK CELEBRATION",
+      "timestamp": "2026-10-19T10:58:34.750Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Priority: High"
+    },
+    {
+      "id": "log_1792407453317_283",
+      "actor": "Akosua Frimpong",
+      "action": "SWITCH_USER",
+      "target": "a.frimpong@nya.gov.gh",
+      "timestamp": "2026-10-19T10:57:33.317Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to Principal HR Officer"
+    },
+    {
+      "id": "log_1792407428911_634",
+      "actor": "Ekow Eshun",
+      "action": "TASK_STATUS_UPDATE",
+      "target": "NSS PERSONEL PROFILE",
+      "timestamp": "2026-10-19T10:57:08.911Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Status: COMPLETED"
+    },
+    {
+      "id": "log_1792407392873_69",
+      "actor": "Ekow Eshun",
+      "action": "TASK_CREATE",
+      "target": "NSS PERSONEL PROFILE",
+      "timestamp": "2026-10-19T10:56:32.873Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Assigned to Akosua Frimpong"
+    },
+    {
+      "id": "log_1792407341153_734",
+      "actor": "Ekow Eshun",
+      "action": "SWITCH_USER",
+      "target": "ekow.eshun@nya.gov.gh",
+      "timestamp": "2026-10-19T10:55:41.153Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to HEAD OF HR & OPERATIONS"
+    },
+    {
+      "id": "log_1792407267359_116",
+      "actor": "Akosua Frimpong",
+      "action": "MEETING_CLEAR_ALL",
+      "target": "All Meetings",
+      "timestamp": "2026-10-19T10:54:27.359Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Cleared all meetings from calendar"
+    },
+    {
+      "id": "log_1792407234709_452",
+      "actor": "Akosua Frimpong",
+      "action": "SWITCH_USER",
+      "target": "a.frimpong@nya.gov.gh",
+      "timestamp": "2026-10-19T10:53:54.709Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to Principal HR Officer"
+    },
+    {
+      "id": "log_1792407225573_372",
+      "actor": "Ekow Eshun",
+      "action": "MEETING_CREATE",
+      "target": "MEETING TODAY",
+      "timestamp": "2026-10-19T10:53:45.573Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "2024-05-18 at 09:00AM"
+    },
+    {
+      "id": "log_1792407180738_518",
+      "actor": "Ekow Eshun",
+      "action": "TASK_CREATE",
+      "target": "GO FOR LUNCH",
+      "timestamp": "2026-10-19T10:53:00.738Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Assigned to Ekow Eshun"
+    },
+    {
+      "id": "log_1792407153306_347",
+      "actor": "Ekow Eshun",
+      "action": "TASK_CLEAR_ALL",
+      "target": "All Tasks",
+      "timestamp": "2026-10-19T10:52:33.306Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Cleared all tasks from system"
+    },
+    {
+      "id": "log_1792407144622_334",
+      "actor": "Ekow Eshun",
+      "action": "TASK_STATUS_UPDATE",
+      "target": "NSS PERSONELS PROFILE",
+      "timestamp": "2026-10-19T10:52:24.622Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Status: COMPLETED"
+    },
+    {
+      "id": "log_1792407111084_581",
+      "actor": "Ekow Eshun",
+      "action": "SWITCH_USER",
+      "target": "ekow.eshun@nya.gov.gh",
+      "timestamp": "2026-10-19T10:51:51.084Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to HEAD OF HR & OPERATIONS"
+    },
+    {
+      "id": "log_1792407077822_55",
+      "actor": "Miss Gloria",
+      "action": "SWITCH_USER",
+      "target": "miss.gloria@nya.gov.gh",
+      "timestamp": "2026-10-19T10:51:17.822Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to Senior Personnel Officer"
+    },
+    {
+      "id": "log_1792407066672_792",
+      "actor": "Ekow Eshun",
+      "action": "TASK_CREATE",
+      "target": "NSS PERSONELS PROFILE",
+      "timestamp": "2026-10-19T10:51:06.672Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Assigned to Miss Gloria"
+    },
+    {
+      "id": "log_1792406879332_120",
+      "actor": "Ekow Eshun",
+      "action": "MEETING_CLEAR_ALL",
+      "target": "All Meetings",
+      "timestamp": "2026-10-19T10:47:59.332Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Cleared all meetings from calendar"
+    },
+    {
+      "id": "log_1792406856756_519",
+      "actor": "Ekow Eshun",
+      "action": "TASK_CLEAR_ALL",
+      "target": "All Tasks",
+      "timestamp": "2026-10-19T10:47:36.756Z",
+      "status": "SUCCESS",
+      "ipAddress": "LAN",
+      "details": "Cleared all tasks from system"
+    },
+    {
+      "id": "log_1792406770535_589",
+      "actor": "Ekow Eshun",
+      "action": "SWITCH_USER",
+      "target": "ekow.eshun@nya.gov.gh",
+      "timestamp": "2026-10-19T10:46:10.535Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to HEAD OF HR & OPERATIONS"
+    },
+    {
+      "id": "log_1792406750793_908",
+      "actor": "Akosua Frimpong",
+      "action": "SWITCH_USER",
+      "target": "a.frimpong@nya.gov.gh",
+      "timestamp": "2026-10-19T10:45:50.793Z",
+      "status": "SUCCESS",
+      "ipAddress": "154.160.17.98",
+      "details": "Switched active session to Principal HR Officer"
+    },
+    {
+      "id": "log1",
+      "actor": "Ekow Eshun",
+      "action": "LOGIN",
+      "target": "HR Central Session",
+      "timestamp": "2024-05-18T08:14:22Z",
+      "status": "SUCCESS",
+      "ipAddress": "192.168.1.15",
+      "details": "Authenticated from NYA Head Office (Accra) workstation"
+    },
+    {
+      "id": "log2",
+      "actor": "Kwabena Osei",
+      "action": "DOCUMENT_UPLOAD",
+      "target": "NSSP_Posting_Schedule_2026.doc",
+      "timestamp": "2024-05-18T08:30:10Z",
+      "status": "SUCCESS",
+      "ipAddress": "192.168.1.42",
+      "details": "Uploaded regional deployment schedule (1.4 MB)"
+    },
+    {
+      "id": "log3",
+      "actor": "Ekow Eshun",
+      "action": "CASE_STATUS_CHANGE",
+      "target": "Case NYA-HR-2024-082",
+      "timestamp": "2024-05-18T09:12:00Z",
+      "status": "SUCCESS",
+      "ipAddress": "192.168.1.15",
+      "details": "YLSTI staffing review placed in pending queue"
+    },
+    {
+      "id": "log4",
+      "actor": "Dr. Emmanuel Mensah",
+      "action": "ANNOUNCEMENT_PUBLISH",
+      "target": "Submission of Annual PSC Staff Performance Appraisals",
+      "timestamp": "2024-05-15T11:00:00Z",
+      "status": "SUCCESS",
+      "ipAddress": "192.168.1.10",
+      "details": "Broadcasted to all 16 NYA regional directorates"
+    },
+    {
+      "id": "log5",
+      "actor": "Hajia Amina Fuseini",
+      "action": "DOCUMENT_DOWNLOAD",
+      "target": "Ghana_Labour_Act_651_Compliance_Manual.pdf",
+      "timestamp": "2024-05-18T10:45:00Z",
+      "status": "SUCCESS",
+      "ipAddress": "192.168.1.28",
+      "details": "Downloaded for legal review"
+    }
+  ],
+  "systemSettings": {
+    "orgName": "Ghana Youth Authority",
+    "subTitle": "National Youth Authority (NYA) - Human Resources Directorate",
+    "lanHost": "192.168.1.100",
+    "allowSelfRegistration": false,
+    "requireDocumentApproval": true,
+    "timezone": "GMT",
+    "maintenanceMode": false
+  },
+  "resetTickets": []
+}
