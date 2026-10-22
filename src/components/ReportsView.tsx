@@ -118,8 +118,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="text-2xl font-bold text-black mt-1 tabular-nums tracking-tight">
                 {cases.length}
               </div>
-              <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-                +14.88% this month
+              <div className="text-[10px] text-slate-600 font-semibold mt-1">
+                {cases.length === 0 ? '0 requests recorded' : `${cases.length} active request(s)`}
               </div>
             </div>
 
@@ -127,11 +127,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="text-xs font-semibold text-black">
                 Pending Review
               </div>
-              <div className="text-2xl font-bold text-amber-300 mt-1 tabular-nums tracking-tight">
+              <div className="text-2xl font-bold text-amber-600 mt-1 tabular-nums tracking-tight">
                 {cases.filter(c => c.status === 'PENDING_ACCEPTANCE').length}
               </div>
-              <div className="text-[10px] text-black mt-1">
-                Requires action
+              <div className="text-[10px] text-slate-600 mt-1">
+                {cases.filter(c => c.status === 'PENDING_ACCEPTANCE').length === 0 ? 'Queue clear' : 'Requires action'}
               </div>
             </div>
 
@@ -142,8 +142,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="text-2xl font-bold text-[#7738FF] mt-1 tabular-nums tracking-tight">
                 {cases.filter(c => c.status === 'IN_PROGRESS').length}
               </div>
-              <div className="text-[10px] text-black mt-1">
-                Under active review
+              <div className="text-[10px] text-slate-600 mt-1">
+                {cases.filter(c => c.status === 'IN_PROGRESS').length === 0 ? 'None in progress' : 'Under active review'}
               </div>
             </div>
 
@@ -151,11 +151,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <div className="text-xs font-semibold text-black">
                 Avg. Resolution Time
               </div>
-              <div className="text-2xl font-bold text-sky-400 mt-1 tabular-nums tracking-tight">
-                4.2 Days
+              <div className="text-2xl font-bold text-sky-600 mt-1 tabular-nums tracking-tight">
+                0 Days
               </div>
-              <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-                98.4% SLA adherence
+              <div className="text-[10px] text-slate-600 font-semibold mt-1">
+                100% SLA adherence
               </div>
             </div>
           </div>

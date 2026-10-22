@@ -12,7 +12,8 @@ import type {
   Announcement,
   AuditLog,
   DashboardData,
-  NotificationItem
+  NotificationItem,
+  UserRole
 } from '../src/types.ts';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -84,6 +85,7 @@ export interface AppDatabase {
   auditLogs: AuditLog[];
   notifications?: NotificationItem[];
   resetTickets?: PasswordResetTicket[];
+  sessions?: Session[];
   systemSettings: {
     orgName: string;
     subTitle: string;
@@ -224,576 +226,22 @@ const defaultSeedData: AppDatabase = {
       mustChangePassword: false
     }
   ],
-  cases: [
-    {
-      id: 'c1',
-      name: 'NSSP 2026/2027 Cohort Deployment & Regional Postings',
-      caseNumber: 'NYA-HR-2026-081',
-      category: 'Postings & Deployment',
-      dates: 'May 18, 2024 - May 25, 2024',
-      priority: 'Low',
-      attachment: {
-        name: 'NSSP_Posting_Schedule_2026.doc',
-        size: '1.4 MB'
-      },
-      assignee: {
-        id: 'u3',
-        name: 'Kwabena Osei',
-        initials: 'KO',
-        color: '#8b5cf6'
-      },
-      status: 'PENDING_ACCEPTANCE',
-      description: 'Orientation, station allotment, and mentorship deployment of 140 National Service personnel to 16 NYA regional secretariats.',
-      department: 'Regional Operations',
-      country: 'Greater Accra',
-      createdDate: '2024-05-18'
-    },
-    {
-      id: 'c2',
-      name: 'YLSTI Instructor Staffing Review - Afienya & Ajumako Centers',
-      caseNumber: 'NYA-HR-2024-082',
-      category: 'Training & Skills',
-      dates: 'May 18, 2024 - May 25, 2024',
-      priority: 'Medium',
-      attachment: {
-        name: 'YLSTI_Staffing_Assessment.doc',
-        size: '2.8 MB'
-      },
-      assignee: {
-        id: 'u1',
-        name: 'Ekow Eshun',
-        initials: 'EE',
-        color: '#006b3f'
-      },
-      status: 'PENDING_ACCEPTANCE',
-      description: 'Comprehensive audit of technical instructors and vocational training facilitators across 11 Youth Leadership and Skills Training Institutes.',
-      department: 'Vocational Training',
-      country: 'Ashanti',
-      createdDate: '2024-05-18'
-    },
-    {
-      id: 'c3',
-      name: 'Civil Service Annual Promotion & PSC Evaluation Benchmarks',
-      caseNumber: 'NYA-HR-2024-083',
-      category: 'Promotions',
-      dates: 'May 20, 2024 - Jun 02, 2024',
-      priority: 'Low',
-      attachment: {
-        name: 'PSC_Promotion_Dossier_2026.doc',
-        size: '4.1 MB'
-      },
-      assignee: {
-        id: 'u2',
-        name: 'Akosua Frimpong',
-        initials: 'AF',
-        color: '#0ea5e9'
-      },
-      status: 'PENDING_ACCEPTANCE',
-      description: 'Verification of eligible Senior Youth Officers submitted to the Public Services Commission (PSC) for promotion interviews.',
-      department: 'People & Culture',
-      country: 'Western',
-      createdDate: '2024-05-20'
-    },
-    {
-      id: 'c4',
-      name: 'Staff Health Scheme & Welfare Allowance Review',
-      caseNumber: 'NYA-HR-2024-084',
-      category: 'Staff Welfare',
-      dates: 'May 22, 2024 - May 30, 2024',
-      priority: 'High',
-      attachment: {
-        name: 'Welfare_Fund_Statement_Q2.xlsx',
-        size: '890 KB'
-      },
-      assignee: {
-        id: 'u4',
-        name: 'Miss Gloria',
-        initials: 'MG',
-        color: '#ec4899'
-      },
-      status: 'IN_PROGRESS',
-      description: 'Restructuring of regional staff health insurance supplementary scheme and maternity support provisions.',
-      department: 'Staff Welfare',
-      country: 'Eastern',
-      createdDate: '2024-05-22'
-    },
-    {
-      id: 'c5',
-      name: 'Ghana Labour Act (Act 651) Internal Policy Alignment',
-      caseNumber: 'NYA-HR-2024-085',
-      category: 'Policy & Compliance',
-      dates: 'May 24, 2024 - Jun 05, 2024',
-      priority: 'Medium',
-      attachment: {
-        name: 'Labour_Act_651_Compliance_Brief.pdf',
-        size: '720 KB'
-      },
-      assignee: {
-        id: 'u6',
-        name: 'Hajia Amina Fuseini',
-        initials: 'AF',
-        color: '#f59e0b'
-      },
-      status: 'IN_PROGRESS',
-      description: 'Harmonization of internal grievance procedures with National Youth Authority Act (Act 939) and Ghana Public Services standards.',
-      department: 'Legal Affairs',
-      country: 'Northern',
-      createdDate: '2024-05-24'
-    }
-  ],
-  tasks: [
-    {
-      id: 't1',
-      title: 'Review Q3 Regional Directorate Staff Allocations',
-      description: 'Audit personnel headcount across Ashanti, Western, and Northern regional secretariats.',
-      priority: 'High',
-      status: 'PENDING',
-      dueDate: 'Oct 20, 2026',
-      assigneeId: 'u1',
-      assigneeName: 'Ekow Eshun',
-      creatorId: 'u1',
-      creatorName: 'Ekow Eshun',
-      category: 'Operations',
-      createdAt: '2026-10-10',
-      commentsCount: 2,
-      isMyTask: true
-    },
-    {
-      id: 't2',
-      title: 'Audit Regional Welfare Health Subscriptions',
-      description: 'Verify all 16 regional health scheme claims with finance and welfare committee.',
-      priority: 'Urgent',
-      status: 'PENDING',
-      dueDate: 'Oct 22, 2026',
-      assigneeId: 'u4',
-      assigneeName: 'Miss Gloria',
-      creatorId: 'u1',
-      creatorName: 'Ekow Eshun',
-      category: 'Welfare',
-      createdAt: '2026-10-12',
-      commentsCount: 1,
-      isMyTask: false
-    },
-    {
-      id: 't3',
-      title: 'Organize NSSP Orientation Manuals',
-      description: 'Prepare orientation packages for incoming National Service Personnel.',
-      priority: 'Medium',
-      status: 'IN_PROGRESS',
-      dueDate: 'Oct 18, 2026',
-      assigneeId: 'u4',
-      assigneeName: 'Miss Gloria',
-      creatorId: 'u4',
-      creatorName: 'Miss Gloria',
-      category: 'Onboarding',
-      createdAt: '2026-10-11',
-      commentsCount: 0,
-      isMyTask: true
-    },
-    {
-      id: 't4',
-      title: 'Submit PSC Promotion Candidate Dossiers',
-      description: 'Compile evaluation sheets for Public Services Commission interviews.',
-      priority: 'High',
-      status: 'IN_PROGRESS',
-      dueDate: 'Oct 25, 2026',
-      assigneeId: 'u2',
-      assigneeName: 'Akosua Frimpong',
-      creatorId: 'u1',
-      creatorName: 'Ekow Eshun',
-      category: 'Promotions',
-      createdAt: '2026-10-09',
-      commentsCount: 3,
-      isMyTask: false
-    }
-  ],
-  meetings: [
-    {
-      id: 'm1',
-      title: 'Departmental Review & Operations Briefing',
-      description: 'Quarterly review of regional HR performance indicators and NSSP postings.',
-      date: new Date().toISOString().split('T')[0],
-      dayLabel: 'TODAY',
-      startTime: '10:00',
-      endTime: '11:30',
-      location: 'Executive Conference Room 1',
-      colorBar: '#8b5cf6',
-      participants: ['Ekow Eshun', 'Miss Gloria', 'Akosua Frimpong'],
-      status: 'UPCOMING'
-    },
-    {
-      id: 'm2',
-      title: 'NSSP Deployment & Regional Secretariat Briefing',
-      description: 'Orientation alignment for district youth officers and YLSTI facilitators.',
-      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-      dayLabel: 'TOMORROW',
-      startTime: '14:00',
-      endTime: '15:30',
-      location: 'Main Boardroom (Accra Head Office)',
-      colorBar: '#10b981',
-      participants: ['Ekow Eshun', 'Kwabena Osei', 'Miss Gloria'],
-      status: 'UPCOMING'
-    }
-  ],
-  notifications: [
-    {
-      id: 'n1',
-      userId: 'u4',
-      type: 'TASK_ASSIGNED',
-      title: 'New Assigned Task',
-      message: 'Ekow Eshun assigned task: Audit Regional Welfare Health Subscriptions',
-      relatedEntityId: 't2',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      read: false,
-      actionUrl: '/tasks'
-    },
-    {
-      id: 'n2',
-      userId: 'u4',
-      type: 'MESSAGE',
-      title: 'New Message from Ekow Eshun',
-      message: 'Please ensure all regional health scheme claims are reconciled before Friday.',
-      relatedEntityId: 'conv3',
-      createdAt: new Date(Date.now() - 7200000).toISOString(),
-      read: false,
-      actionUrl: '/messages'
-    },
-    {
-      id: 'n3',
-      userId: 'u1',
-      type: 'ANNOUNCEMENT',
-      title: 'Official Circular Published',
-      message: 'Submission of Annual PSC Staff Performance Appraisals',
-      relatedEntityId: 'ann1',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      read: true,
-      actionUrl: '/announcements'
-    }
-  ],
-  conversations: [
-    {
-      id: 'conv1',
-      name: 'Akosua Frimpong',
-      isGroup: false,
-      participantIds: ['u1', 'u2'],
-      participantNames: ['Ekow Eshun', 'Akosua Frimpong'],
-      lastMessage: 'The promotion interview schedules from Public Services Commission have arrived.',
-      lastMessageTime: '2 days ago',
-      unreadCount: 1,
-      avatarText: 'AF',
-      avatarBg: '#0ea5e9'
-    },
-    {
-      id: 'conv2',
-      name: 'Kwabena Osei',
-      isGroup: false,
-      participantIds: ['u1', 'u3'],
-      participantNames: ['Ekow Eshun', 'Kwabena Osei'],
-      lastMessage: 'All district youth officer postings for Ashanti region have been submitted for review.',
-      lastMessageTime: '5 days ago',
-      unreadCount: 1,
-      avatarText: 'KO',
-      avatarBg: '#8b5cf6'
-    },
-    {
-      id: 'conv3',
-      name: 'Miss Gloria',
-      isGroup: false,
-      participantIds: ['u1', 'u4'],
-      participantNames: ['Ekow Eshun', 'Miss Gloria'],
-      lastMessage: 'NSSP orientation materials are fully printed and ready for distribution.',
-      lastMessageTime: '1 hour ago',
-      unreadCount: 0,
-      avatarText: 'MG',
-      avatarBg: '#ec4899'
-    },
-    {
-      id: 'conv4',
-      name: 'Kofi Boateng',
-      isGroup: false,
-      participantIds: ['u1', 'u5'],
-      participantNames: ['Ekow Eshun', 'Kofi Boateng'],
-      lastMessage: 'Afienya center instructors have completed their COTVET skill evaluations.',
-      lastMessageTime: 'Yesterday',
-      unreadCount: 0,
-      avatarText: 'KB',
-      avatarBg: '#10b981'
-    },
-    {
-      id: 'conv5',
-      name: 'Hajia Amina Fuseini',
-      isGroup: false,
-      participantIds: ['u1', 'u6'],
-      participantNames: ['Ekow Eshun', 'Hajia Amina Fuseini'],
-      lastMessage: 'The legal review of our updated Scheme of Service is complete.',
-      lastMessageTime: '3 days ago',
-      unreadCount: 0,
-      avatarText: 'AF',
-      avatarBg: '#f59e0b'
-    },
-    {
-      id: 'conv_group1',
-      name: 'NYA HR Directorate Executive Team',
-      isGroup: true,
-      participantIds: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7'],
-      participantNames: ['Ekow Eshun', 'Akosua Frimpong', 'Kwabena Osei', 'Miss Gloria', 'Kofi Boateng', 'Hajia Amina Fuseini', 'Dr. Emmanuel Mensah'],
-      lastMessage: 'All regional deployment schedules are approved. Review commences Friday.',
-      lastMessageTime: '4 hours ago',
-      unreadCount: 0,
-      avatarText: 'NYA',
-      avatarBg: '#006b3f'
-    }
-  ],
-  messages: [
-    {
-      id: 'msg1',
-      conversationId: 'conv1',
-      senderId: 'u2',
-      senderName: 'Akosua Frimpong',
-      senderInitials: 'AF',
-      senderBg: '#0ea5e9',
-      text: 'Good morning Ekow, the Public Services Commission has confirmed the promotion interview dates for our Senior Youth Officers. All candidate dossiers are indexed in the repository.',
-      timestamp: '2024-05-14T10:15:00Z',
-      timeAgo: '2 days ago',
-      unread: true
-    },
-    {
-      id: 'msg2',
-      conversationId: 'conv2',
-      senderId: 'u3',
-      senderName: 'Kwabena Osei',
-      senderInitials: 'KO',
-      senderBg: '#8b5cf6',
-      text: 'Greetings Director, the Ashanti and Western regional secretariats have confirmed receipt of their NSSP cohort quotas. We are preparing the regional orientation itinerary.',
-      timestamp: '2024-05-11T14:40:00Z',
-      timeAgo: '5 days ago',
-      unread: true
-    },
-    {
-      id: 'msg3',
-      conversationId: 'conv3',
-      senderId: 'u4',
-      senderName: 'Miss Gloria',
-      senderInitials: 'MG',
-      senderBg: '#ec4899',
-      text: 'Hello Ekow, the welfare allowance calculations for Q2 have been finalized per the latest civil service circular.',
-      timestamp: '2024-05-16T08:00:00Z',
-      timeAgo: '2 hours ago',
-      unread: false
-    },
-    {
-      id: 'msg4',
-      conversationId: 'conv3',
-      senderId: 'u1',
-      senderName: 'Ekow Eshun',
-      senderInitials: 'EE',
-      senderBg: '#006b3f',
-      text: 'Thank you Gloria. Please ensure all regional health scheme claims are reconciled before Friday.',
-      timestamp: '2024-05-16T08:20:00Z',
-      timeAgo: '1 hour ago',
-      unread: false
-    },
-    {
-      id: 'msg5',
-      conversationId: 'conv_group1',
-      senderId: 'u7',
-      senderName: 'Dr. Emmanuel Mensah',
-      senderInitials: 'EM',
-      senderBg: '#6366f1',
-      text: 'Colleagues, let us ensure all quarterly HR indicators are submitted ahead of the National Youth Authority Governing Board sitting.',
-      timestamp: '2024-05-16T09:00:00Z',
-      timeAgo: '4 hours ago',
-      unread: false
-    }
-  ],
-  documents: [
-    {
-      id: 'doc1',
-      name: 'NYA_Scheme_of_Service_and_Staff_Handbook_Act939.pdf',
-      category: 'Policy',
-      folder: 'Statutory Regulations',
-      fileSize: '3.8 MB',
-      fileType: 'application/pdf',
-      uploadedBy: 'Dr. Emmanuel Mensah',
-      uploadedAt: '2024-01-15',
-      version: 'v2026.1',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER', 'HR_DIRECTOR'],
-      downloadCount: 142,
-      isArchived: false
-    },
-    {
-      id: 'doc2',
-      name: 'Ghana_Labour_Act_651_Compliance_Manual.pdf',
-      category: 'Policy',
-      folder: 'Statutory Regulations',
-      fileSize: '2.4 MB',
-      fileType: 'application/pdf',
-      uploadedBy: 'Hajia Amina Fuseini',
-      uploadedAt: '2024-02-10',
-      version: 'v3.2',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_DIRECTOR'],
-      downloadCount: 88,
-      isArchived: false
-    },
-    {
-      id: 'doc3',
-      name: 'NSSP_Deployment_and_Mentorship_Guide_2026.docx',
-      category: 'Onboarding',
-      folder: 'National Service Personnel',
-      fileSize: '1.2 MB',
-      fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      uploadedBy: 'Miss Gloria',
-      uploadedAt: '2024-05-18',
-      version: 'v1.4',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER'],
-      downloadCount: 65,
-      isArchived: false
-    },
-    {
-      id: 'doc4',
-      name: 'YLSTI_Vocational_Staff_Deployment_Schedule.xlsx',
-      category: 'Template',
-      folder: 'Vocational Training Institutes',
-      fileSize: '950 KB',
-      fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      uploadedBy: 'Kofi Boateng',
-      uploadedAt: '2024-04-05',
-      version: 'v2.0',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST'],
-      downloadCount: 34,
-      isArchived: false
-    },
-    {
-      id: 'doc5',
-      name: 'Public_Services_Commission_Promotion_Guidelines.pdf',
-      category: 'Policy',
-      folder: 'Promotions & Evaluations',
-      fileSize: '2.1 MB',
-      fileType: 'application/pdf',
-      uploadedBy: 'Akosua Frimpong',
-      uploadedAt: '2024-03-12',
-      version: 'v1.1',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_DIRECTOR'],
-      downloadCount: 52,
-      isArchived: false
-    },
-    {
-      id: 'doc6',
-      name: 'Staff_Medical_Welfare_Policy_NYA.pdf',
-      category: 'Policy',
-      folder: 'Staff Welfare & Healthcare',
-      fileSize: '1.6 MB',
-      fileType: 'application/pdf',
-      uploadedBy: 'Miss Gloria',
-      uploadedAt: '2024-03-25',
-      version: 'v2.2',
-      accessRole: ['HR_ADMIN', 'HR_MANAGER', 'HR_SPECIALIST', 'HR_OFFICER'],
-      downloadCount: 77,
-      isArchived: false
-    }
-  ],
-  announcements: [
-    {
-      id: 'ann1',
-      title: 'Submission of Annual PSC Staff Performance Appraisals (SPER Form A)',
-      content: 'All Regional Directors, District Youth Coordinators, and Unit Heads must submit completed staff performance evaluation forms for the 2025/2026 assessment year to the HR Directorate by May 31.',
-      category: 'Policy Update',
-      priority: 'High',
-      authorName: 'Ekow Eshun',
-      authorRole: 'Head of HR & Operations',
-      publishedAt: '2024-05-15',
-      expiryDate: '2024-05-31',
-      pinned: true,
-      isDraft: false,
-      acknowledgedBy: ['u1', 'u2', 'u3']
-    },
-    {
-      id: 'ann2',
-      title: 'Deployment Notice: 2026/2027 National Service Personnel to NYA Secretariats',
-      content: 'Official postings of newly assigned National Service Personnel to the Accra Head Office, Regional Secretariats, and YLSTI Vocational Training Institutes have been finalized and uploaded to the Document Repository.',
-      category: 'General',
-      priority: 'Medium',
-      authorName: 'Miss Gloria',
-      authorRole: 'Senior Personnel Officer',
-      publishedAt: '2024-05-12',
-      expiryDate: '2024-06-30',
-      pinned: true,
-      isDraft: false,
-      acknowledgedBy: ['u1', 'u3', 'u4']
-    },
-    {
-      id: 'ann3',
-      title: 'Special Capacity Building Workshop at National Youth Leadership Institute',
-      content: 'A 3-day supervisory and youth project management workshop will be hosted at the Afienya Youth Institute for newly appointed District Youth Officers. Registration is open via HR.',
-      category: 'Benefits',
-      priority: 'Low',
-      authorName: 'Kofi Boateng',
-      authorRole: 'Vocational Training Lead',
-      publishedAt: '2024-05-10',
-      pinned: false,
-      isDraft: false,
-      acknowledgedBy: ['u1']
-    }
-  ],
-  auditLogs: [
-    {
-      id: 'log1',
-      actor: 'Ekow Eshun',
-      action: 'LOGIN',
-      target: 'HR Central Session',
-      timestamp: '2024-05-18T08:14:22Z',
-      status: 'SUCCESS',
-      ipAddress: '192.168.1.15',
-      details: 'Authenticated from NYA Head Office (Accra) workstation'
-    },
-    {
-      id: 'log2',
-      actor: 'Kwabena Osei',
-      action: 'DOCUMENT_UPLOAD',
-      target: 'NSSP_Posting_Schedule_2026.doc',
-      timestamp: '2024-05-18T08:30:10Z',
-      status: 'SUCCESS',
-      ipAddress: '192.168.1.42',
-      details: 'Uploaded regional deployment schedule (1.4 MB)'
-    },
-    {
-      id: 'log3',
-      actor: 'Ekow Eshun',
-      action: 'CASE_STATUS_CHANGE',
-      target: 'Case NYA-HR-2024-082',
-      timestamp: '2024-05-18T09:12:00Z',
-      status: 'SUCCESS',
-      ipAddress: '192.168.1.15',
-      details: 'YLSTI staffing review placed in pending queue'
-    },
-    {
-      id: 'log4',
-      actor: 'Dr. Emmanuel Mensah',
-      action: 'ANNOUNCEMENT_PUBLISH',
-      target: 'Submission of Annual PSC Staff Performance Appraisals',
-      timestamp: '2024-05-15T11:00:00Z',
-      status: 'SUCCESS',
-      ipAddress: '192.168.1.10',
-      details: 'Broadcasted to all 16 NYA regional directorates'
-    },
-    {
-      id: 'log5',
-      actor: 'Hajia Amina Fuseini',
-      action: 'DOCUMENT_DOWNLOAD',
-      target: 'Ghana_Labour_Act_651_Compliance_Manual.pdf',
-      timestamp: '2024-05-18T10:45:00Z',
-      status: 'SUCCESS',
-      ipAddress: '192.168.1.28',
-      details: 'Downloaded for legal review'
-    }
-  ],
+  cases: [],
+  tasks: [],
+  meetings: [],
+  notifications: [],
+  conversations: [],
+  messages: [],
+  documents: [],
+  announcements: [],
+  auditLogs: [],
   systemSettings: {
-    orgName: 'Ghana Youth Authority',
-    subTitle: 'National Youth Authority (NYA) - Human Resources Directorate',
-    lanHost: '192.168.1.100',
+    orgName: "Ghana Youth Authority",
+    subTitle: "National Youth Authority (NYA) - Human Resources Directorate",
+    lanHost: "192.168.1.100",
     allowSelfRegistration: false,
     requireDocumentApproval: true,
-    timezone: 'GMT',
+    timezone: "GMT",
     maintenanceMode: false
   }
 };
@@ -804,6 +252,25 @@ class StorageManager {
 
   constructor() {
     this.db = this.loadDatabase();
+    if (Array.isArray(this.db.sessions)) {
+      const now = Date.now();
+      for (const s of this.db.sessions) {
+        if (s && s.id && s.userId && s.expiresAt > now) {
+          this.sessions.set(s.id, s);
+        }
+      }
+    }
+  }
+
+  private syncSessionsToDb(): void {
+    const now = Date.now();
+    for (const [id, s] of this.sessions.entries()) {
+      if (now > s.expiresAt) {
+        this.sessions.delete(id);
+      }
+    }
+    this.db.sessions = Array.from(this.sessions.values());
+    this.saveDatabase(this.db);
   }
 
   private ensureUsersIntegrity(rawUsers: any[]): UserRecord[] {
@@ -897,6 +364,7 @@ class StorageManager {
           parsed = this.migrateLegacyNames(parsed);
           parsed.users = this.ensureUsersIntegrity(parsed.users);
           if (!parsed.resetTickets) parsed.resetTickets = [];
+          if (!parsed.sessions) parsed.sessions = [];
           this.saveDatabase(parsed);
           return parsed;
         }
@@ -994,18 +462,50 @@ class StorageManager {
   }
 
   // Dashboard Aggregates calculated directly from real database items for Ghana Youth Authority
-  public getDashboardData(currentUserId = 'u1'): DashboardData {
+  public getDashboardData(currentUserId?: string): DashboardData {
+    if (!currentUserId) {
+      return {
+        stats: {
+          newCasesCount: 0,
+          newCasesTrend: '0 pending',
+          newCasesTrendPositive: false,
+          newTasksCount: 0,
+          newTasksTrend: '0 active',
+          newTasksTrendPositive: false,
+          totalOpenCases: 0,
+          activeTeamMembers: this.db.users.filter(u => u.status === 'ACTIVE').length,
+          unreadMessagesCount: 0,
+          publishedAnnouncementsCount: 0,
+          upcomingMeetingsCount: 0
+        },
+        casesToAccept: [],
+        recentMessages: [],
+        recentDocuments: [],
+        recentAnnouncements: [],
+        recentActivity: [],
+        caseTypeBreakdown: [],
+        countryBreakdown: [],
+        calendarEvents: [],
+        myTasks: [],
+        tasksAssignedToOthers: []
+      };
+    }
+
     const user = this.db.users.find(u => u.id === currentUserId);
     const isHrHead = user?.role === 'HR_ADMIN';
 
-    const pendingCases = this.db.cases.filter(c => c.status === 'PENDING_ACCEPTANCE');
+    // Cases
+    const userCases = isHrHead
+      ? this.db.cases
+      : this.db.cases.filter(c => c.assignee?.id === currentUserId);
+    const pendingCases = userCases.filter(c => c.status === 'PENDING_ACCEPTANCE');
     
     // My Personal Tasks: assigned to me AND created by me (or marked isMyTask)
     const myTasks = this.db.tasks.filter(t => t.assigneeId === currentUserId && (t.creatorId === currentUserId || t.isMyTask));
     
     // Assigned Tasks:
     // For ordinary staff: tasks assigned to them by HR Head/others (creatorId !== currentUserId)
-    // For HR Head: tasks created by HR Head and assigned to others
+    // For HR Head: tasks created by HR Head and assigned to others (creatorId === currentUserId && assigneeId !== currentUserId)
     const tasksAssignedToOthers = isHrHead
       ? this.db.tasks.filter(t => t.creatorId === currentUserId && t.assigneeId !== currentUserId)
       : this.db.tasks.filter(t => t.assigneeId === currentUserId && t.creatorId !== currentUserId);
@@ -1019,13 +519,13 @@ class StorageManager {
     ];
     const caseTypeBreakdown = categories.map(cat => ({
       type: cat.type,
-      count: this.db.cases.filter(c => c.category === cat.type).length,
+      count: userCases.filter(c => c.category === cat.type).length,
       color: cat.color
     }));
 
     const regions = ['Greater Accra', 'Ashanti', 'Western', 'Eastern', 'Northern'];
     const countryBreakdown = regions.map(region => {
-      const activeCases = this.db.cases.filter(c => c.country === region).length;
+      const activeCases = userCases.filter(c => c.country === region).length;
       return {
         country: region,
         activeCases,
@@ -1034,32 +534,47 @@ class StorageManager {
       };
     });
 
-    const unreadMessagesCount = this.db.messages.filter(m => m.unread).length;
-    const activeAnnouncements = this.db.announcements.filter(a => !a.isDraft);
-    const activeDocuments = this.db.documents.filter(d => !d.isArchived);
+    // Conversations & Messages authorized for this user
+    const userConversations = this.getConversations(currentUserId);
+    const userConvIds = userConversations.map(c => c.id);
+    const userMessages = this.db.messages.filter(m => userConvIds.includes(m.conversationId));
+    const unreadMessagesCount = userMessages.filter(m =>
+      m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))
+    ).length;
+
+    const activeAnnouncements = (this.db.announcements || []).filter(a => !a.isDraft);
+    const activeDocuments = this.getDocuments(currentUserId, user?.role, user?.name);
+    const userMeetings = this.getMeetings(currentUserId);
+    const upcomingMeetings = userMeetings.filter(m => m.status === 'UPCOMING');
+
+    const recentActivity = isHrHead
+      ? (this.db.auditLogs || []).slice(0, 4)
+      : (this.db.auditLogs || []).filter(l => l.actor === user?.name || (l.target && l.target.includes(user?.name || ''))).slice(0, 4);
+
+    const activeTasksCount = myTasks.filter(t => t.status !== 'COMPLETED').length + tasksAssignedToOthers.filter(t => t.status !== 'COMPLETED').length;
 
     return {
       stats: {
-        newCasesCount: this.db.cases.length,
-        newCasesTrend: `+${pendingCases.length} pending`,
-        newCasesTrendPositive: true,
+        newCasesCount: userCases.length,
+        newCasesTrend: `${pendingCases.length} pending`,
+        newCasesTrendPositive: pendingCases.length > 0,
         newTasksCount: myTasks.length + tasksAssignedToOthers.length,
-        newTasksTrend: `${myTasks.filter(t => t.status !== 'COMPLETED').length} active`,
-        newTasksTrendPositive: myTasks.filter(t => t.status !== 'COMPLETED').length > 0,
-        totalOpenCases: this.db.cases.length,
+        newTasksTrend: `${activeTasksCount} active`,
+        newTasksTrendPositive: activeTasksCount > 0,
+        totalOpenCases: userCases.length,
         activeTeamMembers: this.db.users.filter(u => u.status === 'ACTIVE').length,
         unreadMessagesCount,
         publishedAnnouncementsCount: activeAnnouncements.length,
-        upcomingMeetingsCount: this.db.meetings.filter(m => m.status === 'UPCOMING').length
+        upcomingMeetingsCount: upcomingMeetings.length
       },
-      casesToAccept: pendingCases.length > 0 ? pendingCases : this.db.cases.slice(0, 3),
-      recentMessages: this.db.messages.slice(0, 2),
+      casesToAccept: pendingCases,
+      recentMessages: userMessages.slice(0, 2),
       recentDocuments: activeDocuments.slice(0, 3),
       recentAnnouncements: activeAnnouncements.slice(0, 2),
-      recentActivity: this.db.auditLogs.slice(0, 4),
+      recentActivity,
       caseTypeBreakdown,
       countryBreakdown,
-      calendarEvents: this.db.meetings,
+      calendarEvents: userMeetings,
       myTasks,
       tasksAssignedToOthers
     };
@@ -1093,16 +608,28 @@ class StorageManager {
 
   // Tasks
   public getTasks(userId?: string, userRole?: string): Task[] {
-    if (!userId || userRole === 'HR_ADMIN') {
-      return this.db.tasks;
-    }
-    return this.db.tasks.filter(t => t.assigneeId === userId || t.creatorId === userId);
+    if (!userId) return [];
+    const visible = userRole === 'HR_ADMIN'
+      ? this.db.tasks.filter(t =>
+          t.creatorId === userId ||
+          t.assigneeId === userId ||
+          (t.creatorId !== t.assigneeId)
+        )
+      : this.db.tasks.filter(t => t.assigneeId === userId || t.creatorId === userId);
+
+    return visible.map(t => ({
+      ...t,
+      isMyTask: t.assigneeId === userId && (!t.creatorId || t.creatorId === userId)
+    }));
   }
 
   public createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'commentsCount'>, actor: string): Task {
+    const isPersonal = !taskData.creatorId || taskData.assigneeId === taskData.creatorId;
     const task: Task = {
       ...taskData,
-      id: 't_' + Date.now(),
+      isMyTask: isPersonal,
+      reminderAcknowledgedBy: taskData.reminderAcknowledgedBy || [],
+      id: 't_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       createdAt: new Date().toISOString().split('T')[0],
       commentsCount: 0
     };
@@ -1121,6 +648,25 @@ class StorageManager {
     return this.db.tasks[idx];
   }
 
+  public acknowledgeTaskReminder(id: string, userId: string, reminderKey?: string): Task | null {
+    const idx = this.db.tasks.findIndex(t => t.id === id);
+    if (idx === -1) return null;
+    const task = this.db.tasks[idx];
+    if (!Array.isArray(task.reminderAcknowledgedBy)) {
+      task.reminderAcknowledgedBy = [];
+    }
+    const tokenKey = reminderKey || `${task.id}__${task.dueDate}__${task.dueTime || '17:00'}`;
+    const userEntry = `${userId}:${tokenKey}`;
+    if (!task.reminderAcknowledgedBy.includes(userEntry)) {
+      task.reminderAcknowledgedBy.push(userEntry);
+    }
+    if (!task.reminderAcknowledgedBy.includes(userId)) {
+      task.reminderAcknowledgedBy.push(userId);
+    }
+    this.saveDatabase(this.db);
+    return task;
+  }
+
   public clearAllTasks(actor = 'Admin'): void {
     this.db.tasks = [];
     this.saveDatabase(this.db);
@@ -1128,8 +674,12 @@ class StorageManager {
   }
 
   // Meetings
-  public getMeetings(): Meeting[] {
-    return this.db.meetings;
+  public getMeetings(userId?: string): Meeting[] {
+    if (!this.db.meetings) return [];
+    if (!userId) return this.db.meetings;
+    return this.db.meetings.filter(m => 
+      !m.attendeeIds || m.attendeeIds.length === 0 || m.attendeeIds.includes(userId) || m.organizerId === userId || !m.status || m.status === 'UPCOMING'
+    );
   }
 
   public createMeeting(data: Omit<Meeting, 'id'>, actor: string): Meeting {
@@ -1280,8 +830,15 @@ class StorageManager {
   }
 
   // Documents
-  public getDocuments(): DocumentItem[] {
-    return this.db.documents.filter(d => !d.isArchived);
+  public getDocuments(userId?: string, userRole?: string, userName?: string): DocumentItem[] {
+    if (!this.db.documents) return [];
+    const active = this.db.documents.filter(d => !d.isArchived);
+    if (!userRole) return active;
+    if (userRole === 'HR_ADMIN' || userRole === 'HR_DIRECTOR') return active;
+    return active.filter(d => 
+      (d.accessRole && d.accessRole.includes(userRole as UserRole)) ||
+      (userName && d.uploadedBy === userName)
+    );
   }
 
   public createDocument(doc: Omit<DocumentItem, 'id' | 'uploadedAt' | 'downloadCount' | 'isArchived'>, actor: string): DocumentItem {
@@ -1603,9 +1160,27 @@ class StorageManager {
     userData: Omit<User, 'id' | 'joinedDate'> & { username?: string; initialPassword?: string; mustChangePassword?: boolean },
     actor: string
   ): User {
+    if (!userData.name || !userData.name.trim()) {
+      throw new Error('Full official name is required.');
+    }
+    if (!userData.email || !userData.email.trim()) {
+      throw new Error('Official email address is required.');
+    }
+
+    const emailTrimmed = userData.email.trim().toLowerCase();
+    const existingEmail = this.db.users.find(u => u.email && u.email.toLowerCase() === emailTrimmed);
+    if (existingEmail) {
+      throw new Error(`An account with email address '${userData.email}' already exists.`);
+    }
+
     let username = userData.username?.trim();
     if (!username) {
       username = userData.email ? userData.email.split('@')[0] : 'user_' + Date.now();
+    }
+
+    const existingUsername = this.db.users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
+    if (existingUsername) {
+      throw new Error(`Username '${username}' is already assigned to another staff member.`);
     }
 
     const initialPlain = userData.initialPassword || 'Staff@2026!NYA';
@@ -1659,6 +1234,7 @@ class StorageManager {
   }
 
   public updateUserStatus(id: string, status: User['status'], actor: string): User | null {
+    if (status !== 'ACTIVE' && status !== 'INACTIVE') return null;
     const user = this.db.users.find(u => u.id === id);
     if (!user) return null;
     user.status = status;
@@ -1682,6 +1258,7 @@ class StorageManager {
       userAgent
     };
     this.sessions.set(id, session);
+    this.syncSessionsToDb();
     return session;
   }
 
@@ -1691,22 +1268,29 @@ class StorageManager {
     if (!session) return null;
     if (Date.now() > session.expiresAt) {
       this.sessions.delete(sessionId);
+      this.syncSessionsToDb();
       return null;
     }
     return session;
   }
 
   public invalidateSession(sessionId: string): void {
-    if (sessionId) {
+    if (sessionId && this.sessions.has(sessionId)) {
       this.sessions.delete(sessionId);
+      this.syncSessionsToDb();
     }
   }
 
   public invalidateUserSessions(userId: string): void {
+    let changed = false;
     for (const [id, session] of this.sessions.entries()) {
       if (session.userId === userId) {
         this.sessions.delete(id);
+        changed = true;
       }
+    }
+    if (changed) {
+      this.syncSessionsToDb();
     }
   }
 

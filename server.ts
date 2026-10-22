@@ -120,14 +120,13 @@ io.on('connection', (socket) => {
 // --- REST API ENDPOINTS ---
 
 // Auth & Session Utilities
-let currentActiveUserId = 'u1'; // Default fallback
-
 function getSessionUser(req: Request) {
   const headerToken = (req.headers['x-session-id'] as string) ||
     (typeof req.headers['authorization'] === 'string' && req.headers['authorization'].startsWith('Bearer ')
       ? req.headers['authorization'].slice(7)
       : null);
-  const sessionId = req.cookies?.nya_session_id || headerToken;
+  const queryToken = (req.query.token as string) || (req.query.sessionId as string);
+  const sessionId = req.cookies?.nya_session_id || headerToken || queryToken;
   if (!sessionId) return null;
   const session = storage.getSession(sessionId);
   if (!session) return null;
@@ -136,26 +135,45 @@ function getSessionUser(req: Request) {
   return user;
 }
 
+function requireAuth(req: Request, res: Response, next: () => void) {
+  const user = getSessionUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required. Please sign in.' });
+  }
+  (req as any).user = user;
+  next();
+}
+
 function getActorUser(req: Request) {
-  return getSessionUser(req) || storage.getUserById(currentActiveUserId) || storage.getUsers()[0];
+  return (req as any).user || getSessionUser(req);
 }
 
 // RBAC Role Verification Middleware
-function requireAdmin(_req: Request, _res: Response, next: () => void) {
+function requireAdmin(req: Request, res: Response, next: () => void) {
+  const user = getSessionUser(req);
+  if (!user || (user.role !== 'HR_ADMIN' && user.role !== 'HR_DIRECTOR' && user.role !== 'HR_MANAGER')) {
+    return res.status(403).json({ error: 'Access denied: HR Administrator or Executive Management privileges required.' });
+  }
+  (req as any).user = user;
+  next();
+}
+
+function requireHeadOfHr(req: Request, res: Response, next: () => void) {
+  const user = getSessionUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication session required or expired. Please sign in.' });
+  }
+  if (user.role !== 'HR_ADMIN') {
+    return res.status(403).json({ error: 'Access denied: Only the Head of HR is authorized to create, deactivate, or reset employee accounts.' });
+  }
+  (req as any).user = user;
   next();
 }
 
 // 1. Session verification / Current User
 app.get('/api/auth/me', (req: Request, res: Response) => {
-  let user = getSessionUser(req);
-  if (!user && currentActiveUserId) {
-    user = storage.getUserById(currentActiveUserId);
-  }
-  if (!user) {
-    user = storage.getUsers()[0];
-  }
+  const user = getSessionUser(req);
   if (user) {
-    currentActiveUserId = user.id;
     return res.json({ authenticated: true, user });
   }
   return res.status(401).json({ authenticated: false, user: null });
@@ -163,7 +181,8 @@ app.get('/api/auth/me', (req: Request, res: Response) => {
 
 // 2. Local Login (LAN Offline)
 app.post('/api/auth/login', (req: Request, res: Response) => {
-  const { identifier, password } = req.body;
+  const identifier = req.body.identifier || req.body.emailOrUsername || req.body.email || req.body.username;
+  const { password } = req.body;
   if (!identifier || !password) {
     return res.status(400).json({ error: 'Please enter both username/email and password.' });
   }
@@ -182,7 +201,8 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
 
     if (result.reason === 'DEACTIVATED') {
       return res.status(403).json({
-        error: 'Your user account has been deactivated by the HR Administrator. Access to NYA HR Central is revoked.',
+        error: 'Your account has been deactivated by the HR administrator. Please contact the HR department for assistance.',
+        code: 'ACCOUNT_DEACTIVATED',
         deactivated: true
       });
     }
@@ -195,7 +215,6 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
 
   // Create secure session
   const user = result.user!;
-  currentActiveUserId = user.id;
   const session = storage.createSession(user.id, clientIp, req.headers['user-agent'] || '');
 
   // Set secure HTTP-only cookie (8 hours expiry)
@@ -238,7 +257,15 @@ app.post('/api/auth/logout', (req: Request, res: Response) => {
 
 // 4. Change Password Functionality
 app.post('/api/auth/change-password', (req: Request, res: Response) => {
-  const user = getSessionUser(req);
+  let user = getSessionUser(req);
+
+  // Fallback if cross-site iframe stripped Authorization headers or cookies:
+  // Identify user by userId or email/username from request body
+  if (!user && (req.body.userId || req.body.email || req.body.username)) {
+    const idKey = req.body.userId || req.body.email || req.body.username;
+    user = storage.getUserById(idKey) || storage.findUserByUsernameOrEmail(idKey);
+  }
+
   if (!user) {
     return res.status(401).json({ error: 'Authentication session required' });
   }
@@ -263,7 +290,21 @@ app.post('/api/auth/change-password', (req: Request, res: Response) => {
     return res.status(400).json({ error: result.error });
   }
 
-  res.json({ success: true, message: 'Password updated successfully' });
+  // Create a refreshed session for the user
+  const session = storage.createSession(user.id, clientIp, req.headers['user-agent'] || '');
+  res.cookie('nya_session_id', session.id, {
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 8 * 60 * 60 * 1000,
+    path: '/'
+  });
+
+  res.json({
+    success: true,
+    message: 'Password updated successfully',
+    sessionId: session.id,
+    user: storage.getUserById(user.id)
+  });
 });
 
 // 5. Offline LAN Password Reset Request
@@ -285,15 +326,14 @@ app.post('/api/auth/request-reset', (req: Request, res: Response) => {
   });
 });
 
-// 6. Switch Active User (Testing & Administrative inspection)
-app.post('/api/auth/switch-user', (req: Request, res: Response) => {
+// 6. Switch Active User (Controlled Administrator Access Only)
+app.post('/api/auth/switch-user', requireAdmin, (req: Request, res: Response) => {
   const { userId } = req.body;
   const users = storage.getUsers();
   const user = users.find(u => u.id === userId);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
-  currentActiveUserId = user.id;
 
   const clientIp = getClientIp(req);
   const session = storage.createSession(user.id, clientIp, req.headers['user-agent'] || '');
@@ -310,26 +350,31 @@ app.post('/api/auth/switch-user', (req: Request, res: Response) => {
 });
 
 // Dashboard Data
-app.get('/api/dashboard', (_req: Request, res: Response) => {
-  const data = storage.getDashboardData(currentActiveUserId);
+app.get('/api/dashboard', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  const data = storage.getDashboardData(user.id);
   res.json(data);
 });
 
 // Cases
-app.get('/api/cases', (_req: Request, res: Response) => {
-  res.json(storage.getCases());
+app.get('/api/cases', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  if (user.role === 'HR_ADMIN' || user.role === 'HR_DIRECTOR') {
+    return res.json(storage.getCases());
+  }
+  res.json(storage.getCases().filter(c => c.assignee?.id === user.id));
 });
 
-app.post('/api/cases', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.post('/api/cases', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const newCase = storage.createCase(req.body, user.name);
   io.emit('case_created', newCase);
   res.status(201).json(newCase);
 });
 
-app.patch('/api/cases/:id/status', (req: Request, res: Response) => {
+app.patch('/api/cases/:id/status', requireAuth, (req: Request, res: Response) => {
   const { status } = req.body;
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req)!;
   const updated = storage.updateCaseStatus(req.params.id, status, user.name);
   if (!updated) return res.status(404).json({ error: 'Case not found' });
   io.emit('case_updated', updated);
@@ -337,31 +382,31 @@ app.patch('/api/cases/:id/status', (req: Request, res: Response) => {
 });
 
 // Notifications API
-app.get('/api/notifications', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/notifications', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   res.json(storage.getNotifications(user.id));
 });
 
-app.patch('/api/notifications/:id/read', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.patch('/api/notifications/:id/read', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ok = storage.markNotificationRead(req.params.id, user.id);
   res.json({ success: ok });
 });
 
-app.post('/api/notifications/read-all', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/notifications/read-all', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ok = storage.markAllNotificationsRead(user.id);
   res.json({ success: ok });
 });
 
 // Tasks
-app.get('/api/tasks', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/tasks', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   res.json(storage.getTasks(user.id, user.role));
 });
 
-app.post('/api/tasks', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/tasks', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const task = storage.createTask(
     {
       ...req.body,
@@ -371,7 +416,7 @@ app.post('/api/tasks', (req: Request, res: Response) => {
     user.name
   );
 
-  // Trigger notification if assigned to another user
+  // Trigger notification and targeted socket event if assigned to another user
   if (task.assigneeId && task.assigneeId !== user.id) {
     const notif = storage.createNotification({
       userId: task.assigneeId,
@@ -382,15 +427,22 @@ app.post('/api/tasks', (req: Request, res: Response) => {
       actionUrl: '/tasks'
     });
     io.to(`user_${task.assigneeId}`).emit('new_notification', notif);
+    io.to(`user_${task.assigneeId}`).emit('task_created', { ...task, isMyTask: false });
   }
 
-  io.emit('task_created', task);
-  res.status(201).json(task);
+  io.to(`user_${user.id}`).emit('task_created', {
+    ...task,
+    isMyTask: task.assigneeId === user.id
+  });
+  res.status(201).json({
+    ...task,
+    isMyTask: task.assigneeId === user.id
+  });
 });
 
-app.patch('/api/tasks/:id/status', (req: Request, res: Response) => {
+app.patch('/api/tasks/:id/status', requireAuth, (req: Request, res: Response) => {
   const { status } = req.body;
-  const user = getActorUser(req);
+  const user = getActorUser(req)!;
   const updated = storage.updateTaskStatus(req.params.id, status, user.name);
   if (!updated) return res.status(404).json({ error: 'Task not found' });
 
@@ -405,26 +457,41 @@ app.patch('/api/tasks/:id/status', (req: Request, res: Response) => {
       actionUrl: '/tasks'
     });
     io.to(`user_${updated.creatorId}`).emit('new_notification', notif);
+    io.to(`user_${updated.creatorId}`).emit('task_updated', { ...updated, isMyTask: updated.assigneeId === updated.creatorId });
   }
 
-  io.emit('task_updated', updated);
+  if (updated.assigneeId) {
+    io.to(`user_${updated.assigneeId}`).emit('task_updated', {
+      ...updated,
+      isMyTask: updated.assigneeId === updated.creatorId
+    });
+  }
   res.json(updated);
 });
 
-app.post('/api/tasks/clear', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/tasks/:id/acknowledge-reminder', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  const { reminderKey } = req.body || {};
+  const updated = storage.acknowledgeTaskReminder(req.params.id, user.id, reminderKey);
+  if (!updated) return res.status(404).json({ error: 'Task not found' });
+  res.json({ success: true, task: updated });
+});
+
+app.post('/api/tasks/clear', requireAdmin, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   storage.clearAllTasks(user.name);
   io.emit('tasks_cleared');
   res.json({ success: true, tasks: [] });
 });
 
 // Meetings
-app.get('/api/meetings', (_req: Request, res: Response) => {
-  res.json(storage.getMeetings());
+app.get('/api/meetings', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  res.json(storage.getMeetings(user.id));
 });
 
-app.post('/api/meetings', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/meetings', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const meeting = storage.createMeeting(req.body, user.name);
 
   // Send notifications to all active users
@@ -447,22 +514,22 @@ app.post('/api/meetings', (req: Request, res: Response) => {
   res.status(201).json(meeting);
 });
 
-app.post('/api/meetings/clear', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/meetings/clear', requireAdmin, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   storage.clearAllMeetings(user.name);
   io.emit('meetings_cleared');
   res.json({ success: true, meetings: [] });
 });
 
 // Conversations & Messages
-app.get('/api/conversations', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/conversations', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   res.json(storage.getConversations(user.id));
 });
 
-app.post('/api/conversations', (req: Request, res: Response) => {
+app.post('/api/conversations', requireAuth, (req: Request, res: Response) => {
   const { name, isGroup, participantIds } = req.body;
-  const user = getActorUser(req);
+  const user = getActorUser(req)!;
   const allIds = Array.from(new Set([user.id, ...(participantIds || [])]));
   const conv = storage.createConversation(name || 'New Conversation', isGroup ?? false, allIds, user.name);
   
@@ -473,8 +540,8 @@ app.post('/api/conversations', (req: Request, res: Response) => {
   res.status(201).json(conv);
 });
 
-app.get('/api/conversations/:id/messages', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/conversations/:id/messages', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const conv = storage.getConversationById(req.params.id);
   if (conv && conv.participantIds && !conv.participantIds.includes(user.id)) {
     return res.status(403).json({ error: 'Access denied to conversation' });
@@ -486,8 +553,8 @@ app.get('/api/conversations/:id/messages', (req: Request, res: Response) => {
   res.json(storage.getMessages(req.params.id, user.id));
 });
 
-app.post('/api/conversations/:id/read', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/conversations/:id/read', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const success = storage.markConversationAsRead(req.params.id, user.id);
   if (success) {
     io.to(`user_${user.id}`).emit('conversation_read', { conversationId: req.params.id });
@@ -495,8 +562,8 @@ app.post('/api/conversations/:id/read', (req: Request, res: Response) => {
   res.json({ success });
 });
 
-app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/conversations/:id/messages', requireAuth, upload.single('attachment'), (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const conv = storage.getConversationById(req.params.id);
   if (!conv) {
     return res.status(404).json({ error: 'Conversation not found' });
@@ -601,8 +668,8 @@ app.post('/api/conversations/:id/messages', upload.single('attachment'), (req: R
   res.status(201).json({ ...msg, document: sentDoc });
 });
 
-app.get('/api/messages/:id/download', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/messages/:id/download', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const msg = storage.getMessageById(req.params.id);
   if (!msg) {
     return res.status(404).json({ error: 'Message not found' });
@@ -628,8 +695,8 @@ app.get('/api/messages/:id/download', (req: Request, res: Response) => {
   res.send(sampleContent);
 });
 
-app.get('/api/messages/attachment/download', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/messages/attachment/download', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const messageId = req.query.messageId as string;
   const filename = (req.query.filename as string) || 'Attached_Document.pdf';
 
@@ -656,12 +723,13 @@ app.get('/api/messages/attachment/download', (req: Request, res: Response) => {
 });
 
 // Documents
-app.get('/api/documents', (_req: Request, res: Response) => {
-  res.json(storage.getDocuments());
+app.get('/api/documents', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  res.json(storage.getDocuments(user.id, user.role, user.name));
 });
 
-app.post('/api/documents/upload', upload.single('file'), (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.post('/api/documents/upload', requireAuth, upload.single('file'), (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const file = req.file;
   const { name, category, folder } = req.body;
 
@@ -687,24 +755,24 @@ app.post('/api/documents/upload', upload.single('file'), (req: Request, res: Res
   res.status(201).json(doc);
 });
 
-app.delete('/api/documents/:id', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.delete('/api/documents/:id', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ok = storage.archiveDocument(req.params.id, user.name);
   if (!ok) return res.status(404).json({ error: 'Document not found' });
   io.emit('document_archived', { id: req.params.id });
   res.json({ success: true });
 });
 
-app.patch('/api/documents/:id/rename', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.patch('/api/documents/:id/rename', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const doc = storage.renameDocument(req.params.id, req.body.name, user.name);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
   io.emit('document_updated', doc);
   res.json(doc);
 });
 
-app.get('/api/documents/:id/download', (req: Request, res: Response) => {
-  const user = getActorUser(req);
+app.get('/api/documents/:id/download', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const doc = storage.recordDownload(req.params.id, user.name);
   if (!doc) return res.status(404).json({ error: 'Document not found' });
 
@@ -723,12 +791,12 @@ app.get('/api/documents/:id/download', (req: Request, res: Response) => {
 });
 
 // Announcements
-app.get('/api/announcements', (_req: Request, res: Response) => {
+app.get('/api/announcements', requireAuth, (_req: Request, res: Response) => {
   res.json(storage.getAnnouncements());
 });
 
-app.post('/api/announcements', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.post('/api/announcements', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ann = storage.createAnnouncement({
     ...req.body,
     authorName: user.name,
@@ -738,24 +806,25 @@ app.post('/api/announcements', (req: Request, res: Response) => {
   res.status(201).json(ann);
 });
 
-app.patch('/api/announcements/:id', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.patch('/api/announcements/:id', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ann = storage.updateAnnouncement(req.params.id, req.body, user.name);
   if (!ann) return res.status(404).json({ error: 'Announcement not found' });
   io.emit('announcement_updated', ann);
   res.json(ann);
 });
 
-app.delete('/api/announcements/:id', (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+app.delete('/api/announcements/:id', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
   const ok = storage.deleteAnnouncement(req.params.id, user.name);
   if (!ok) return res.status(404).json({ error: 'Announcement not found' });
   io.emit('announcement_deleted', { id: req.params.id });
   res.json({ success: true });
 });
 
-app.post('/api/announcements/:id/acknowledge', (req: Request, res: Response) => {
-  const ok = storage.acknowledgeAnnouncement(req.params.id, currentActiveUserId);
+app.post('/api/announcements/:id/acknowledge', requireAuth, (req: Request, res: Response) => {
+  const user = getActorUser(req)!;
+  const ok = storage.acknowledgeAnnouncement(req.params.id, user.id);
   res.json({ success: ok });
 });
 
@@ -768,33 +837,50 @@ app.get('/api/admin/users-security', requireAdmin, (_req: Request, res: Response
   res.json(storage.getUsersWithSecurityInfo());
 });
 
-app.post('/api/users', (req: Request, res: Response) => {
-  const actor = getSessionUser(req)?.name || 'HR Administrator';
-  const user = storage.adminCreateUser(req.body, actor);
-  io.emit('user_created', user);
-  res.status(201).json(user);
+app.post('/api/admin/users', requireHeadOfHr, (req: Request, res: Response) => {
+  const actorUser = getSessionUser(req)!;
+  try {
+    const user = storage.adminCreateUser(req.body, actorUser.name);
+    io.emit('user_created', user);
+    res.status(201).json(user);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to create employee account' });
+  }
 });
 
-app.post('/api/admin/users', requireAdmin, (req: Request, res: Response) => {
-  const actor = getSessionUser(req)?.name || 'HR Administrator';
-  const user = storage.adminCreateUser(req.body, actor);
-  io.emit('user_created', user);
-  res.status(201).json(user);
-});
+app.patch('/api/users/:id/status', requireHeadOfHr, (req: Request, res: Response) => {
+  const actorUser = getActorUser(req)!;
+  const targetId = req.params.id;
+  const requestedStatus = req.body?.status;
 
-app.patch('/api/users/:id/status', (req: Request, res: Response) => {
-  const actor = getSessionUser(req)?.name || 'HR Administrator';
-  const user = storage.updateUserStatus(req.params.id, req.body.status, actor);
-  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (requestedStatus !== 'ACTIVE' && requestedStatus !== 'INACTIVE') {
+    return res.status(400).json({ error: 'Invalid account status specified. Expected ACTIVE or INACTIVE.' });
+  }
+  if (targetId === actorUser.id && requestedStatus === 'INACTIVE') {
+    return res.status(400).json({ error: 'Self-deactivation is prohibited. You cannot deactivate your own account.' });
+  }
+
+  const user = storage.updateUserStatus(targetId, requestedStatus, actorUser.name);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (requestedStatus === 'INACTIVE') {
+    io.to(`user_${targetId}`).emit('session_revoked', {
+      userId: targetId,
+      reason: 'Your account has been deactivated by the HR administrator. Please contact the HR department for assistance.'
+    });
+  }
+
   io.emit('user_updated', user);
   res.json(user);
 });
 
-app.post('/api/admin/users/:id/reset-password', (req: Request, res: Response) => {
-  const actor = getSessionUser(req)?.name || 'HR Administrator';
+app.post('/api/admin/users/:id/reset-password', requireHeadOfHr, (req: Request, res: Response) => {
+  const actorUser = getActorUser(req)!;
   const { temporaryPassword } = req.body;
   const temp = temporaryPassword || 'Staff@' + Math.floor(1000 + Math.random() * 9000);
-  const result = storage.adminResetPassword(req.params.id, temp, actor);
+  const result = storage.adminResetPassword(req.params.id, temp, actorUser.name);
   if (!result.success) return res.status(404).json({ error: 'User not found' });
   io.emit('user_updated', result.user);
   res.json(result);
@@ -851,7 +937,7 @@ app.get('/api/admin/lan-info', (_req: Request, res: Response) => {
 });
 
 app.get('/api/admin/backup', requireAdmin, (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req)!;
   storage.logAudit(user.name, 'BACKUP_EXPORT', 'Full Database', 'SUCCESS', getClientIp(req));
   const backup = storage.exportBackup();
   res.setHeader('Content-Type', 'application/json');
@@ -860,7 +946,7 @@ app.get('/api/admin/backup', requireAdmin, (req: Request, res: Response) => {
 });
 
 app.post('/api/admin/restore', requireAdmin, (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req)!;
   const { jsonContent } = req.body;
   const success = storage.restoreBackup(jsonContent, user.name);
   if (!success) {
@@ -911,7 +997,7 @@ app.get('/api/admin/settings', (_req: Request, res: Response) => {
 });
 
 app.patch('/api/admin/settings', requireAdmin, (req: Request, res: Response) => {
-  const user = storage.getUsers().find(u => u.id === currentActiveUserId) || storage.getUsers()[0];
+  const user = getActorUser(req)!;
   const updated = storage.updateSystemSettings(req.body, user.name);
   io.emit('settings_updated', updated);
   res.json(updated);

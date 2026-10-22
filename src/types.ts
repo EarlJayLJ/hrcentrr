@@ -50,6 +50,7 @@ export interface Task {
   priority: Priority;
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   dueDate: string;
+  dueTime?: string;
   assigneeId: string;
   assigneeName: string;
   creatorId: string;
@@ -58,6 +59,7 @@ export interface Task {
   createdAt: string;
   commentsCount: number;
   isMyTask?: boolean;
+  reminderAcknowledgedBy?: string[];
 }
 
 export interface Meeting {
@@ -71,6 +73,8 @@ export interface Meeting {
   location: string;
   colorBar: string; // green, blue, yellow, orange
   participants: string[];
+  organizerId?: string;
+  attendeeIds?: string[];
   minutes?: string;
   actionItems?: string[];
   status: 'UPCOMING' | 'COMPLETED' | 'CANCELLED';

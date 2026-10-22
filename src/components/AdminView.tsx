@@ -4,9 +4,10 @@ import { User, UserRole } from '../types.ts';
 
 interface AdminViewProps {
   users: User[];
+  currentUser?: User;
   lanInfo: any;
   onAddUser: () => void;
-  onToggleUserStatus: (userId: string, currentStatus: User['status']) => void;
+  onToggleUserStatus: (userId: string, currentStatus: User['status']) => Promise<boolean> | void;
   onResetPassword?: (user: User) => void;
   onUnlockAccount?: (userId: string) => void;
   onExportBackup?: () => void;
@@ -15,6 +16,7 @@ interface AdminViewProps {
 
 export const AdminView: React.FC<AdminViewProps> = ({
   users,
+  currentUser,
   lanInfo,
   onAddUser,
   onToggleUserStatus,
@@ -23,6 +25,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   onExportBackup,
   onRestoreBackup
 }) => {
+  const isHeadOfHr = currentUser?.role === 'HR_ADMIN';
   const [searchUser, setSearchUser] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [activeTab, setActiveTab] = useState<'USERS' | 'LAN' | 'SETTINGS' | 'RESETS'>('USERS');
@@ -30,14 +33,26 @@ export const AdminView: React.FC<AdminViewProps> = ({
   // Security stats & reset tickets state
   const [securityUsers, setSecurityUsers] = useState<any[]>([]);
   const [resetTickets, setResetTickets] = useState<any[]>([]);
+  const [confirmingStatusUser, setConfirmingStatusUser] = useState<User | null>(null);
+  const [processingUserId, setProcessingUserId] = useState<string | null>(null);
+
+  const getAuthHeaders = (extra: Record<string, string> = {}) => {
+    const token = localStorage.getItem('nya_session_id');
+    const headers: Record<string, string> = { ...extra };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      headers['X-Session-ID'] = token;
+    }
+    return headers;
+  };
 
   const fetchSecurityData = () => {
-    fetch('/api/admin/users-security')
+    fetch('/api/admin/users-security', { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => Array.isArray(data) && setSecurityUsers(data))
       .catch(console.error);
 
-    fetch('/api/admin/reset-tickets')
+    fetch('/api/admin/reset-tickets', { headers: getAuthHeaders() })
       .then(res => res.json())
       .then(data => Array.isArray(data) && setResetTickets(data))
       .catch(console.error);
@@ -50,7 +65,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
   }, []);
 
   const handleResolveTicket = (ticketId: string) => {
-    fetch(`/api/admin/reset-tickets/${ticketId}/resolve`, { method: 'PATCH' })
+    fetch(`/api/admin/reset-tickets/${ticketId}/resolve`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    })
       .then(res => res.json())
       .then(() => fetchSecurityData())
       .catch(console.error);
@@ -79,7 +97,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const handleSaveSettings = () => {
     fetch('/api/admin/settings', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         timezone: orgTimezone,
         requireDocumentApproval: requireDocApproval,
@@ -117,13 +135,15 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </button>
           )}
 
-          <button
-            onClick={onAddUser}
-            className="flex items-center gap-2 px-4 py-2 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer"
-          >
-            <UserPlus className="w-4 h-4 stroke-[2.5]" />
-            <span>New User Account</span>
-          </button>
+          {isHeadOfHr && (
+            <button
+              onClick={onAddUser}
+              className="flex items-center gap-2 px-4 py-2 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4 stroke-[2.5]" />
+              <span>New User Account</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -297,7 +317,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             </button>
                           )}
 
-                          {onResetPassword && (
+                          {isHeadOfHr && onResetPassword && (
                             <button
                               onClick={() => onResetPassword(u)}
                               title="Provision new temporary password"
@@ -308,16 +328,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             </button>
                           )}
 
-                          <button
-                            onClick={() => onToggleUserStatus(u.id, u.status)}
-                            className={`px-2.5 py-1 border rounded-lg text-xs font-medium transition cursor-pointer ${
-                              u.status === 'ACTIVE'
-                                ? 'glass-btn-secondary border-slate-200/80 text-black hover:text-black'
-                                : 'bg-emerald-500/20 hover:bg-emerald-500/30 border-emerald-500/40 text-emerald-300 font-bold'
-                            }`}
-                          >
-                            {u.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                          </button>
+                          {isHeadOfHr && u.id !== currentUser?.id && (
+                            <button
+                              type="button"
+                              disabled={processingUserId === u.id}
+                              onClick={() => setConfirmingStatusUser(u)}
+                              className={`px-2.5 py-1 border rounded-lg text-xs font-medium transition cursor-pointer disabled:opacity-50 ${
+                                u.status === 'ACTIVE'
+                                  ? 'glass-btn-secondary border-slate-200/80 text-black hover:text-black'
+                                  : 'bg-emerald-500/20 hover:bg-emerald-500/30 border-emerald-500/40 text-emerald-300 font-bold'
+                              }`}
+                            >
+                              {processingUserId === u.id
+                                ? 'Processing...'
+                                : u.status === 'ACTIVE'
+                                ? 'Deactivate'
+                                : 'Activate'}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -394,7 +422,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
                       <td className="py-3 text-right pr-2">
                         <div className="flex items-center justify-end gap-1.5">
-                          {ticket.status === 'PENDING' && target && onResetPassword && (
+                          {isHeadOfHr && ticket.status === 'PENDING' && target && onResetPassword && (
                             <button
                               onClick={() => {
                                 onResetPassword(target);
@@ -533,6 +561,86 @@ export const AdminView: React.FC<AdminViewProps> = ({
             >
               Save Configuration
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Account Deactivation / Activation Confirmation Modal */}
+      {confirmingStatusUser && isHeadOfHr && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4 select-none">
+          <div className="deactivation-modal bg-[#f8fbff] rounded-3xl p-6 max-w-md w-full shadow-[0_25px_60px_-15px_rgba(15,23,42,0.28),0_0_40px_rgba(119,56,255,0.10)] border border-slate-200 text-black animate-in fade-in zoom-in-95 space-y-4 relative z-[60]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className={`w-4 h-4 ${confirmingStatusUser.status === 'ACTIVE' ? 'text-rose-600' : 'text-emerald-600'}`} />
+                <h3 className="text-sm font-bold text-black">
+                  {confirmingStatusUser.status === 'ACTIVE' ? 'Confirm Account Deactivation' : 'Confirm Account Reactivation'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                disabled={processingUserId === confirmingStatusUser.id}
+                onClick={() => setConfirmingStatusUser(null)}
+                className="p-1 text-slate-500 hover:text-black rounded-lg hover:bg-slate-100 cursor-pointer disabled:opacity-50"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2.5 text-xs">
+              <p className="text-black leading-relaxed">
+                Are you sure you want to{' '}
+                <span className="font-bold">
+                  {confirmingStatusUser.status === 'ACTIVE' ? 'deactivate' : 'reactivate'}
+                </span>{' '}
+                the employee account for <span className="font-bold">{confirmingStatusUser.name}</span> ({confirmingStatusUser.email})?
+              </p>
+              {confirmingStatusUser.status === 'ACTIVE' ? (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] leading-relaxed">
+                  Deactivating this account will immediately revoke active sessions and block this employee from signing in until reactivated by the Head of HR. Historical records and messages are preserved.
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] leading-relaxed">
+                  Reactivating this account will restore standard sign-in access for this employee.
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200/80 text-xs">
+              <button
+                type="button"
+                disabled={processingUserId === confirmingStatusUser.id}
+                onClick={() => setConfirmingStatusUser(null)}
+                className="px-4 py-2 text-black hover:bg-slate-100 rounded-xl font-semibold transition cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={processingUserId === confirmingStatusUser.id}
+                onClick={async () => {
+                  const target = confirmingStatusUser;
+                  setProcessingUserId(target.id);
+                  try {
+                    await onToggleUserStatus(target.id, target.status);
+                    fetchSecurityData();
+                  } finally {
+                    setProcessingUserId(null);
+                    setConfirmingStatusUser(null);
+                  }
+                }}
+                className={`px-4 py-2 rounded-xl font-bold transition cursor-pointer disabled:opacity-50 ${
+                  confirmingStatusUser.status === 'ACTIVE'
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                }`}
+              >
+                {processingUserId === confirmingStatusUser.id
+                  ? 'Processing...'
+                  : confirmingStatusUser.status === 'ACTIVE'
+                  ? 'Deactivate Account'
+                  : 'Activate Account'}
+              </button>
+            </div>
           </div>
         </div>
       )}

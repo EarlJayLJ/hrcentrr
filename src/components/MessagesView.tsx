@@ -7,6 +7,7 @@ interface MessagesViewProps {
   activeConversationId: string;
   messages: Message[];
   currentUser: UserType;
+  searchQuery?: string;
   onSelectConversation: (id: string) => void;
   onSendMessage: (payload: FormData | { text: string; attachmentName?: string; replyTo?: Message['replyTo'] }) => void;
   onOpenNewConversation?: () => void;
@@ -17,6 +18,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
   activeConversationId,
   messages,
   currentUser,
+  searchQuery = '',
   onSelectConversation,
   onSendMessage,
   onOpenNewConversation
@@ -34,17 +36,22 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
   const activeConv = conversations.find(c => c.id === activeConversationId) || conversations[0];
   const allCurrentMessages = messages.filter(m => m.conversationId === (activeConv?.id || ''));
 
-  const filteredMessages = chatSearch.trim()
+  const effectiveChatSearch = (chatSearch || searchQuery || '').trim().toLowerCase();
+
+  const filteredMessages = effectiveChatSearch
     ? allCurrentMessages.filter(m =>
-        m.text.toLowerCase().includes(chatSearch.toLowerCase()) ||
-        m.senderName.toLowerCase().includes(chatSearch.toLowerCase()) ||
-        (m.attachmentName && m.attachmentName.toLowerCase().includes(chatSearch.toLowerCase()))
+        m.text.toLowerCase().includes(effectiveChatSearch) ||
+        m.senderName.toLowerCase().includes(effectiveChatSearch) ||
+        (m.attachmentName && m.attachmentName.toLowerCase().includes(effectiveChatSearch))
       )
     : allCurrentMessages;
 
+  const effectiveConvSearch = (convSearch || searchQuery || '').trim().toLowerCase();
+
   const filteredConversations = conversations.filter(c =>
-    c.name.toLowerCase().includes(convSearch.toLowerCase()) ||
-    c.lastMessage.toLowerCase().includes(convSearch.toLowerCase())
+    !effectiveConvSearch ||
+    c.name.toLowerCase().includes(effectiveConvSearch) ||
+    c.lastMessage.toLowerCase().includes(effectiveConvSearch)
   );
 
   useEffect(() => {
@@ -102,16 +109,16 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
   };
 
   return (
-    <div className="glass-liquid-window rounded-2xl overflow-hidden flex flex-col md:flex-row h-[740px] max-h-[calc(100vh-140px)] text-black select-none border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
-      {/* Channels / Conversations List */}
-      <div className="w-full md:w-72 lg:w-80 shrink-0 border-r border-slate-200/80 flex flex-col bg-white/40 backdrop-blur-xl min-w-0">
-        <div className="p-3.5 border-b border-slate-200/80 flex items-center justify-between bg-white/50 gap-2">
+    <div className="glass-liquid-window rounded-2xl overflow-hidden flex flex-col md:flex-row h-full min-h-[540px] w-full text-black select-none border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)]">
+      {/* Channels / Conversations List (Compact to give chat window maximum width) */}
+      <div className="w-full md:w-60 lg:w-68 shrink-0 border-r border-slate-200/80 flex flex-col bg-white/50 backdrop-blur-xl min-w-0">
+        <div className="p-3 border-b border-slate-200/80 flex items-center justify-between bg-white/60 gap-2">
           <h3 className="text-xs font-bold text-black uppercase tracking-wider truncate">
-            Conversations
+            Chats
           </h3>
           <button
             onClick={onOpenNewConversation}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-cta rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+            className="flex items-center gap-1 px-2.5 py-1 glass-liquid-cta rounded-lg text-xs font-bold transition cursor-pointer shrink-0"
             title="Start new conversation"
           >
             <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -120,54 +127,55 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
         </div>
 
         {/* Conversation search */}
-        <div className="p-2.5 border-b border-slate-200/80 bg-white/30">
+        <div className="p-2 border-b border-slate-200/80 bg-white/40">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#00A884]" />
             <input
               type="text"
               value={convSearch}
               onChange={(e) => setConvSearch(e.target.value)}
-              placeholder="Search conversations..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white/70 focus:bg-white text-black placeholder-slate-400 rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none transition shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]"
+              placeholder="Search or start new chat..."
+              className="w-full pl-8 pr-3 py-1 text-xs bg-white focus:bg-white text-black placeholder-slate-400 rounded-lg border border-slate-200 focus:border-[#00A884] focus:outline-none transition shadow-xs"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+        <div className="flex-1 overflow-y-auto p-1.5 space-y-1">
           {filteredConversations.map((conv) => {
             const isActive = conv.id === activeConv?.id;
             return (
               <button
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
-                className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl transition text-left cursor-pointer border ${
+                className={`w-full flex items-center gap-2.5 p-2 rounded-xl transition text-left cursor-pointer border ${
                   isActive
-                    ? 'glass-liquid-nav-active font-bold scale-[1.01]'
+                    ? 'bg-[#E9EDEF]/80 font-bold border-slate-300 shadow-xs'
                     : 'bg-transparent border-transparent hover:bg-white/80 text-black'
                 }`}
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs ring-1 ring-white/40"
-                  style={{ backgroundColor: conv.avatarBg || '#7738FF' }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs ring-1 ring-white/60 relative"
+                  style={{ backgroundColor: conv.avatarBg || '#00A884' }}
                 >
                   {conv.avatarText}
+                  <span className="w-2 h-2 rounded-full bg-[#25D366] absolute bottom-0 right-0 ring-1 ring-white"></span>
                 </div>
 
                 <div className="flex-1 min-w-0 pr-1">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-1.5">
                     <span className="text-xs font-bold truncate flex-1 min-w-0 text-black">
                       {conv.name}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-700 shrink-0">
+                    <span className="text-[9.5px] font-mono text-slate-500 shrink-0">
                       {conv.lastMessageTime}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-1.5 mt-0.5">
-                    <p className="text-[11px] truncate flex-1 min-w-0 text-slate-800">
+                    <p className="text-[11px] truncate flex-1 min-w-0 text-slate-600 font-normal">
                       {conv.lastMessage}
                     </p>
                     {conv.unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 bg-[#7738FF] text-white font-bold text-[9px] rounded-full shrink-0 shadow-xs">
+                      <span className="px-1.5 py-0.2 bg-[#25D366] text-white font-bold text-[9px] rounded-full shrink-0 shadow-xs min-w-[16px] text-center">
                         {conv.unreadCount}
                       </span>
                     )}
@@ -178,157 +186,166 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           })}
 
           {filteredConversations.length === 0 && (
-            <div className="text-center py-8 text-xs text-black">
-              No conversations found
+            <div className="text-center py-8 text-xs text-slate-500 font-medium">
+              {conversations.length === 0 ? 'No conversations yet.' : 'No chats found matching search.'}
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Chat Box */}
-      <div className="flex-1 flex flex-col bg-white/20 backdrop-blur-md min-w-0">
-        {/* Chat Header */}
-        <div className="p-3.5 px-4 sm:px-6 border-b border-slate-200/80 flex items-center justify-between gap-3 bg-white/50 backdrop-blur-md min-w-0">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white/50 shrink-0"
-              style={{ backgroundColor: activeConv?.avatarBg || '#7738FF' }}
-            >
-              {activeConv?.avatarText || 'HR'}
+      {/* Main Wide WhatsApp Chat Window */}
+      <div className="flex-1 flex flex-col bg-[#EFEAE2]/40 backdrop-blur-md min-w-0 h-full relative">
+        {!activeConv ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-[#00A884]/15 border border-[#00A884]/30 flex items-center justify-center text-[#008069]">
+              <MessageSquare className="w-7 h-7" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold text-black truncate flex items-center gap-2">
-                <span className="truncate">{activeConv?.name || 'Department Channel'}</span>
-                {activeConv?.isGroup && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#7738FF]/15 text-[#7738FF] border border-[#7738FF]/30 shrink-0">
-                    Group Channel
-                  </span>
-                )}
-              </div>
-              <div 
-                className="text-[11px] text-slate-700 font-semibold truncate mt-0.5" 
-                title={activeConv?.participantNames?.join(', ')}
+            <h3 className="text-sm font-bold text-black">No conversations yet.</h3>
+            <p className="text-xs text-slate-600 max-w-sm">
+              Your direct staff messages and departmental group channels will appear here. Start a secure LAN chat to communicate with colleagues.
+            </p>
+            {onOpenNewConversation && (
+              <button
+                onClick={onOpenNewConversation}
+                className="mt-2 px-4 py-2 bg-[#00A884] hover:bg-[#008f6f] text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2"
               >
-                {activeConv?.isGroup
-                  ? `Members: ${activeConv.participantNames.join(', ')}`
-                  : 'Direct Local LAN Channel · Real-time Online'}
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>New Conversation</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* WhatsApp Chat Header */}
+            <div className="p-2.5 px-4 sm:px-6 border-b border-slate-200/90 flex items-center justify-between gap-3 bg-white/80 backdrop-blur-md min-w-0 shadow-xs">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white shrink-0 relative"
+                  style={{ backgroundColor: activeConv?.avatarBg || '#00A884' }}
+                >
+                  {activeConv?.avatarText || 'HR'}
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] absolute bottom-0 right-0 ring-1.5 ring-white"></span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-bold text-black truncate flex items-center gap-2">
+                    <span className="truncate">{activeConv?.name || 'Department Channel'}</span>
+                    {activeConv?.isGroup && (
+                      <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[#00A884]/15 text-[#008069] border border-[#00A884]/30 shrink-0">
+                        Group
+                      </span>
+                    )}
+                  </div>
+                  <div 
+                    className="text-[10px] text-slate-600 font-medium truncate" 
+                    title={activeConv?.participantNames?.join(', ')}
+                  >
+                    {activeConv?.isGroup
+                      ? `Members: ${activeConv.participantNames.join(', ')}`
+                      : 'online · end-to-end encrypted local channel'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Search inside active chat */}
+              <div className="relative shrink-0">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#008069]" />
+                <input
+                  type="text"
+                  value={chatSearch}
+                  onChange={(e) => setChatSearch(e.target.value)}
+                  placeholder="Search chat..."
+                  className="pl-8 pr-3 py-1 text-xs bg-white text-black placeholder-slate-400 rounded-full border border-slate-200 focus:border-[#008069] focus:outline-none w-28 sm:w-40 focus:w-52 transition-all shadow-xs"
+                />
               </div>
             </div>
-          </div>
 
-          {/* Search inside active chat */}
-          <div className="relative shrink-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
-            <input
-              type="text"
-              value={chatSearch}
-              onChange={(e) => setChatSearch(e.target.value)}
-              placeholder="Search chat..."
-              className="pl-8 pr-3 py-1 text-xs bg-white/80 focus:bg-white text-black placeholder-slate-500 rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-32 sm:w-44 focus:w-56 transition-all shadow-xs"
-            />
-          </div>
-        </div>
-
-        {/* Messages Stream */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            {/* Messages Stream - WhatsApp Styled Bubbles */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
           {filteredMessages.map((msg) => {
             const isMe = msg.senderId === currentUser.id;
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+                className={`flex gap-2 items-end ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
               >
-                {/* Sender Avatar */}
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-xs ring-2 ring-white/50 mb-0.5"
-                  style={{ backgroundColor: isMe ? '#7738FF' : (msg.senderBg || '#4F46E5') }}
-                  title={isMe ? `${currentUser.name} (You)` : msg.senderName}
-                >
-                  {isMe 
-                    ? (currentUser.name ? currentUser.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('') : 'ME') 
-                    : msg.senderInitials}
-                </div>
+                {/* Avatar for others in group */}
+                {!isMe && (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9.5px] font-bold shrink-0 shadow-xs ring-1 ring-white/60 mb-0.5"
+                    style={{ backgroundColor: msg.senderBg || '#008069' }}
+                    title={msg.senderName}
+                  >
+                    {msg.senderInitials}
+                  </div>
+                )}
 
                 <div
-                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-3.5 text-xs shadow-sm min-w-0 ${
+                  className={`max-w-[85%] sm:max-w-[70%] rounded-xl p-2.5 sm:p-3 text-xs shadow-[0_1px_1px_rgba(11,20,26,0.12)] min-w-[120px] ${
                     isMe
-                      ? 'bg-gradient-to-r from-[#7738FF] to-[#9A75FF] text-white rounded-br-xs shadow-md border border-white/20'
-                      : 'bg-white/95 backdrop-blur-md border border-white/90 text-black shadow-xs rounded-bl-xs'
+                      ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-none border border-[#c3f0bb]'
+                      : 'bg-white text-[#111B21] rounded-tl-none border border-slate-100'
                   }`}
                 >
-                  {/* Sender Header Name & Timestamp clearly positioned with no cutoff */}
-                  <div className="flex items-center justify-between gap-3 mb-1.5 pb-1 border-b border-black/10">
-                    <span className={`font-bold text-[11px] truncate ${isMe ? 'text-white' : 'text-[#7738FF]'}`}>
-                      {isMe ? `${currentUser.name} (You)` : msg.senderName}
-                    </span>
-                    <span className={`text-[10px] font-mono shrink-0 ${isMe ? 'text-violet-100' : 'text-slate-600'}`}>
-                      {msg.timeAgo}
-                    </span>
-                  </div>
+                  {/* Sender Header for Received Messages */}
+                  {!isMe && (
+                    <div className="font-bold text-[11px] text-[#008069] mb-1">
+                      {msg.senderName}
+                    </div>
+                  )}
 
                   {/* Reply preview */}
                   {msg.replyTo && (
-                    <div
-                      className={`mb-2 p-1.5 rounded-lg text-[10px] border-l-2 ${
-                        isMe
-                          ? 'bg-white/20 border-white text-white'
-                          : 'bg-slate-100 border-[#7738FF] text-slate-800'
-                      }`}
-                    >
-                      <span className="font-bold">{msg.replyTo.senderName}:</span>{' '}
+                    <div className="mb-1.5 p-1.5 rounded-md text-[10px] bg-black/[0.04] border-l-3 border-[#008069] text-slate-800">
+                      <span className="font-bold text-[#008069]">{msg.replyTo.senderName}:</span>{' '}
                       {msg.replyTo.text}
                     </div>
                   )}
 
-                  <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap break-words text-[12px]">{msg.text}</p>
 
                   {/* Attachment if any */}
                   {msg.attachmentName && (
-                    <div
-                      className={`mt-2.5 p-2.5 rounded-xl flex items-center justify-between gap-3 text-[11px] font-semibold border ${
-                        isMe
-                          ? 'bg-white/20 text-white border-white/30'
-                          : 'bg-slate-50 text-black border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <FileText className={`w-4 h-4 shrink-0 ${isMe ? 'text-white' : 'text-[#7738FF]'}`} />
+                    <div className="mt-2 p-2 rounded-lg flex items-center justify-between gap-2.5 text-[11px] font-semibold bg-black/[0.04] border border-black/[0.06]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <FileText className="w-4 h-4 text-[#008069] shrink-0" />
                         <span className="truncate font-medium">{msg.attachmentName}</span>
                       </div>
                       <a
-                        href={`/api/messages/${msg.id}/download`}
+                        href={`/api/messages/${msg.id}/download?token=${encodeURIComponent(localStorage.getItem('nya_session_id') || '')}`}
                         download={msg.attachmentName}
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shrink-0 cursor-pointer bg-white hover:bg-slate-100 text-black shadow-xs"
+                        className="px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition shrink-0 cursor-pointer bg-white hover:bg-slate-50 text-black shadow-xs border border-slate-200"
                         title="Download Attached File"
                       >
-                        <Download className="w-3 h-3 text-[#7738FF]" />
+                        <Download className="w-3 h-3 text-[#008069]" />
                         <span>Download</span>
                       </a>
                     </div>
                   )}
 
-                  {isMe && (
-                    <div className="mt-1 flex items-center justify-end gap-1 text-[9px] text-violet-100">
-                      <CheckCheck className="w-3 h-3" />
-                    </div>
-                  )}
+                  {/* Timestamp & WhatsApp Double Checkmark */}
+                  <div className="mt-1 flex items-center justify-end gap-1 text-[9.5px] text-slate-500 font-mono">
+                    <span>{msg.timeAgo}</span>
+                    {isMe && (
+                      <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />
+                    )}
+                  </div>
                 </div>
 
                 {/* Reply trigger button */}
                 <button
                   onClick={() => setReplyTarget(msg)}
-                  className="opacity-40 hover:opacity-100 text-black hover:text-[#7738FF] self-center transition cursor-pointer p-1.5 rounded-lg hover:bg-white/60"
+                  className="opacity-30 hover:opacity-100 text-slate-600 hover:text-[#008069] self-center transition cursor-pointer p-1 rounded-lg hover:bg-white/80"
                   title="Reply"
                 >
-                  <Reply className="w-3.5 h-3.5" />
+                  <Reply className="w-3 h-3" />
                 </button>
               </div>
             );
           })}
 
           {filteredMessages.length === 0 && (
-            <div className="text-center py-12 text-xs text-black">
+            <div className="text-center py-12 text-xs text-slate-500">
               {chatSearch ? 'No messages match your search' : 'No messages yet in this conversation'}
             </div>
           )}
@@ -336,18 +353,18 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Bar */}
-        <div className="p-3 border-t border-slate-200/80 bg-white/40 backdrop-blur-md space-y-2">
+        {/* WhatsApp-Style Input Bar */}
+        <div className="p-2 sm:p-2.5 px-3 sm:px-4 border-t border-slate-200 bg-[#F0F2F5] backdrop-blur-md space-y-1.5">
           {/* Active Reply Banner */}
           {replyTarget && (
-            <div className="flex items-center justify-between bg-[#7738FF]/20 px-3 py-1.5 rounded-xl border border-[#7738FF]/40 text-xs">
-              <span className="text-[#7738FF] text-[11px]">
+            <div className="flex items-center justify-between bg-white px-3 py-1 rounded-lg border-l-4 border-[#008069] text-xs shadow-xs">
+              <span className="text-[#008069] text-[11px] truncate">
                 Replying to <span className="font-bold text-black">{replyTarget.senderName}</span>:{' '}
-                "{replyTarget.text.slice(0, 35)}..."
+                "{replyTarget.text.slice(0, 40)}..."
               </span>
               <button
                 onClick={() => setReplyTarget(null)}
-                className="text-[#7738FF] hover:text-black font-bold text-xs cursor-pointer"
+                className="text-slate-500 hover:text-black font-bold text-xs cursor-pointer ml-2"
               >
                 ✕
               </button>
@@ -356,12 +373,12 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
           {/* Active Attachment Banner */}
           {selectedAttachment && (
-            <div className="flex items-center justify-between bg-[#7738FF]/20 px-3 py-1.5 rounded-xl border border-[#7738FF]/40 text-xs">
-              <span className="text-[#7738FF] text-[11px] flex items-center gap-1.5 font-semibold truncate">
-                <Paperclip className="w-3.5 h-3.5 text-[#7738FF] shrink-0" />
+            <div className="flex items-center justify-between bg-white px-3 py-1 rounded-lg border border-slate-200 text-xs shadow-xs">
+              <span className="text-[#008069] text-[11px] flex items-center gap-1.5 font-semibold truncate">
+                <Paperclip className="w-3.5 h-3.5 text-[#008069] shrink-0" />
                 <span className="truncate">Attached: {selectedAttachment.name}</span>
                 {selectedAttachment.size && (
-                  <span className="text-[10px] text-[#7738FF] bg-violet-100 px-1.5 py-0.5 rounded font-normal font-mono">
+                  <span className="text-[9.5px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono">
                     {selectedAttachment.size}
                   </span>
                 )}
@@ -371,7 +388,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                   setSelectedAttachment(null);
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
-                className="text-[#7738FF] hover:text-black font-bold text-xs cursor-pointer ml-2"
+                className="text-slate-400 hover:text-black font-bold text-xs cursor-pointer ml-2"
                 title="Remove attachment"
               >
                 <X className="w-3.5 h-3.5" />
@@ -391,12 +408,10 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`p-2.5 rounded-xl transition cursor-pointer border ${
-                selectedAttachment
-                  ? 'bg-[#7738FF]/25 text-[#7738FF] border-[#7738FF]/50'
-                  : 'text-black hover:text-black hover:bg-white/80 border-transparent'
+              className={`p-2 rounded-full transition cursor-pointer text-slate-600 hover:text-black hover:bg-slate-200 ${
+                selectedAttachment ? 'bg-[#00A884]/20 text-[#008069]' : ''
               }`}
-              title="Attach File from Device"
+              title="Attach Document or Image"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -405,22 +420,24 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={`Send message to ${activeConv?.name || 'recipient'}...`}
+              placeholder={`Type a message to ${activeConv?.name || 'recipient'}...`}
               rows={1}
-              className="flex-1 bg-white/70 focus:bg-white text-black placeholder-slate-700 font-medium px-4 py-2 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none resize-none transition"
+              className="flex-1 bg-white text-black placeholder-slate-500 text-xs px-4 py-2 rounded-full border border-slate-300 focus:border-[#008069] focus:outline-none resize-none transition shadow-xs leading-normal"
             />
 
             <button
               type="button"
               onClick={handleSend}
-              className="p-2.5 glass-liquid-cta rounded-xl text-black shadow-xs border border-white/30 transition cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#00A884] hover:bg-[#008069] text-white shadow-xs flex items-center justify-center transition cursor-pointer shrink-0"
               aria-label="Send Message"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5 ml-0.5" />
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </>
+    )}
+  </div>
+</div>
   );
 };

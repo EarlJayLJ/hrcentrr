@@ -20,6 +20,7 @@ interface DashboardViewProps {
   currentUser: User;
   tasks?: Task[];
   meetings?: Meeting[];
+  searchQuery?: string;
   onOpenMessages: () => void;
   onOpenTasks?: () => void;
   onOpenMeetings?: () => void;
@@ -36,6 +37,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   currentUser,
   tasks = [],
   meetings = [],
+  searchQuery = '',
   onOpenMessages,
   onOpenTasks,
   onOpenMeetings,
@@ -57,46 +59,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const pendingTasks = tasks.filter((t) => t.status !== 'COMPLETED');
   const completedTasks = tasks.filter((t) => t.status === 'COMPLETED');
   const unreadCount = data.stats?.unreadMessagesCount ?? 0;
-  const totalTasksCount = tasks.length > 0 ? tasks.length : (data.stats?.newTasksCount ?? 12);
-  const upcomingMeetingsCount = meetings.length > 0 ? meetings.length : (data.upcomingMeetingsCount ?? 3);
-  const progressPct = totalTasksCount > 0 ? Math.round((completedTasks.length / totalTasksCount) * 100) : 78;
-
-  // Upcoming items combining meetings and tasks (matching reference UI)
-  const upcomingSchedule = [
-    ...meetings.slice(0, 2).map((m) => ({
-      id: m.id,
-      type: 'meeting' as const,
-      title: m.title,
-      time: `${m.startTime || '10:00'} - ${m.endTime || '11:00'}`,
-      icon: Calendar,
-      action: onOpenMeetings
-    })),
-    ...pendingTasks.slice(0, 2).map((t) => ({
-      id: t.id,
-      type: 'task' as const,
-      title: t.title,
-      time: t.dueDate ? `Due ${t.dueDate.replace(', 2026', '').replace(', 2024', '')}` : 'Due today',
-      icon: CheckSquare,
-      action: onOpenTasks
-    }))
-  ].slice(0, 3);
+  const totalTasksCount = tasks.length > 0 ? tasks.length : (data.stats?.newTasksCount ?? 0);
+  const upcomingMeetingsCount = Array.isArray(meetings) ? meetings.length : (data.stats?.upcomingMeetingsCount ?? 0);
+  const progressPct = totalTasksCount > 0 ? Math.round((completedTasks.length / totalTasksCount) * 100) : 0;
 
   return (
-    <div className="space-y-5 select-none text-black">
-      {/* 1. WELCOME HEADER (Matching Reference UI) */}
-      <div className="flex items-center justify-between pb-1">
+    <div className="space-y-4 select-none text-black">
+      {/* 1. WELCOME HEADER */}
+      <div className="flex items-center justify-between pb-0.5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
-            Welcome back
+          <h1 className="text-xl sm:text-2xl font-extrabold text-black tracking-tight leading-tight">
+            Welcome back, {currentUser.name.split(' ')[0]}
           </h1>
-          <p className="text-xs sm:text-sm text-black mt-0.5">
-            Here's what's happening today.
+          <p className="text-xs sm:text-sm text-slate-700 font-medium mt-0.5">
+            Human Resource Directorate Operations Dashboard
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-black text-xs font-bold ring-2 ring-white/20 shadow-xs cursor-pointer hover:ring-[#7738FF]/60 transition"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white/40 shadow-xs cursor-pointer hover:ring-[#7738FF]/60 transition"
             style={{ backgroundColor: currentUser.avatarBg || '#7738FF' }}
             title={currentUser.name}
           >
@@ -105,39 +87,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* 2. THREE STAT TILES (Tasks, Meetings, Progress - Exact Match to Reference UI) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* 2. THREE STAT TILES (Tasks, Meetings, Progress) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Tile 1: Tasks */}
         <div 
           onClick={onOpenTasks}
-          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+          className="glass-liquid-tile glass-card-hover p-3.5 sm:p-4 rounded-xl cursor-pointer flex flex-col justify-between space-y-2.5 border border-white/80 shadow-[0_6px_20px_rgba(15,23,42,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.95)]"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
             <CheckSquare className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-black tabular-nums tracking-tight">
               {totalTasksCount}
             </div>
-            <div className="text-xs text-black font-medium mt-1">
-              Tasks
+            <div className="text-xs sm:text-sm text-slate-800 font-bold mt-0.5">
+              Active Tasks
             </div>
           </div>
         </div>
 
-        {/* Tile 2: Meetings */}
+        {/* Tile 2: Meetings (Guaranteed 0 when none scheduled) */}
         <div 
           onClick={onOpenMeetings}
-          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+          className="glass-liquid-tile glass-card-hover p-3.5 sm:p-4 rounded-xl cursor-pointer flex flex-col justify-between space-y-2.5 border border-white/80 shadow-[0_6px_20px_rgba(15,23,42,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.95)]"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
             <Calendar className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-black tabular-nums tracking-tight">
               {upcomingMeetingsCount}
             </div>
-            <div className="text-xs text-black font-medium mt-1">
+            <div className="text-xs sm:text-sm text-slate-800 font-bold mt-0.5">
               Meetings
             </div>
           </div>
@@ -146,103 +128,163 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Tile 3: Progress */}
         <div 
           onClick={onOpenTasks}
-          className="glass-liquid-tile glass-card-hover p-5 rounded-[22px] cursor-pointer flex flex-col justify-between space-y-3.5 border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1.5px_2px_rgba(255,255,255,0.95)]"
+          className="glass-liquid-tile glass-card-hover p-3.5 sm:p-4 rounded-xl cursor-pointer flex flex-col justify-between space-y-2.5 border border-white/80 shadow-[0_6px_20px_rgba(15,23,42,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.95)]"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shadow-xs">
             <BarChart3 className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-black tabular-nums tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-black tabular-nums tracking-tight">
               {progressPct}%
             </div>
-            <div className="text-xs text-black font-medium mt-1">
-              Progress
+            <div className="text-xs sm:text-sm text-slate-800 font-bold mt-0.5">
+              Resolution Rate
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. UPCOMING SECTION & GLOWING CTA (Exact Match to Reference UI) */}
-      <div className="glass-liquid-tile p-5 rounded-[24px] border border-white/80 shadow-[0_12px_32px_rgba(15,23,42,0.06),inset_0_1.5px_2px_rgba(255,255,255,0.95)] space-y-3">
-        <div className="flex items-center justify-between pb-1">
-          <h3 className="text-sm font-bold text-black tracking-wide">
-            Upcoming
-          </h3>
-          <span className="text-[11px] text-black font-medium">
-            Active Schedule
+      {/* 3. UPCOMING MEETINGS & DEADLINES SECTION */}
+      <div className="glass-liquid-tile p-4 sm:p-5 rounded-2xl border border-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.05),inset_0_1px_1.5px_rgba(255,255,255,0.95)] space-y-3">
+        <div className="flex items-center justify-between pb-0.5">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-sm sm:text-base font-extrabold text-black tracking-wide">
+              Directorate Calendar & Upcoming Deadlines
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#7738FF]/15 border border-[#7738FF]/30 text-black tabular-nums">
+              {meetings.length === 0 ? '0 Scheduled' : `${meetings.length} Scheduled`}
+            </span>
+          </div>
+          <span className="text-[11px] sm:text-xs text-slate-700 font-semibold">
+            Live Synchronized
           </span>
         </div>
 
-        <div className="space-y-2.5">
-          {upcomingSchedule.map((item) => {
-            const Icon = item.icon;
-            return (
+        {/* Meetings sub-block */}
+        {meetings.length > 0 ? (
+          <div className="space-y-2">
+            {meetings.slice(0, 3).map((m) => (
               <div
-                key={item.id}
-                onClick={item.action}
-                className="glass-liquid-pill p-3.5 rounded-2xl flex items-center justify-between cursor-pointer group border border-white/80 hover:border-[#9A75FF]/45 hover:bg-white/80 transition"
+                key={m.id}
+                onClick={onOpenMeetings}
+                className="glass-liquid-pill p-3 rounded-xl flex items-center justify-between cursor-pointer group border border-white/80 hover:border-[#9A75FF]/45 hover:bg-white/80 transition"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#7738FF]/10 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shrink-0 shadow-xs">
-                    <Icon className="w-4 h-4" />
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#7738FF]/15 border border-[#7738FF]/30 flex items-center justify-center text-[#7738FF] shrink-0 shadow-xs">
+                    <Calendar className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs sm:text-sm font-bold text-black group-hover:text-[#7738FF] transition truncate">
-                      {item.title}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-[#7738FF] bg-[#7738FF]/20 px-1.5 py-0.2 rounded">
+                        Meeting
+                      </span>
+                      <div className="text-xs sm:text-sm font-bold text-black group-hover:text-[#7738FF] transition truncate">
+                        {m.title}
+                      </div>
                     </div>
-                    <div className="text-[11px] text-black mt-0.5 font-mono">
-                      {item.time}
+                    <div className="text-[11px] text-slate-600 mt-0.5 font-mono font-medium">
+                      {m.startTime} - {m.endTime} {m.location ? `· ${m.location}` : ''}
                     </div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-black group-hover:text-black group-hover:translate-x-0.5 transition shrink-0 ml-2" />
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/40 border border-white/60">
+            <div className="flex items-center gap-2.5">
+              <Calendar className="w-4 h-4 text-slate-500" />
+              <span className="text-xs text-slate-700 font-semibold">
+                No upcoming meetings.
+              </span>
+            </div>
+            <button
+              onClick={onOpenMeetings}
+              className="text-xs font-bold text-[#7738FF] hover:underline cursor-pointer"
+            >
+              Open Calendar
+            </button>
+          </div>
+        )}
 
-        {/* Glowing + New Task Action Button (Matching Bottom Button in Reference UI) */}
+        {/* Pending tasks deadlines */}
+        {pendingTasks.length > 0 && (
+          <div className="space-y-1.5 pt-1.5 border-t border-slate-200/60">
+            <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Pending Task Deadlines ({pendingTasks.length})
+            </div>
+            <div className="space-y-1.5">
+              {pendingTasks.slice(0, 2).map((t) => (
+                <div
+                  key={t.id}
+                  onClick={onOpenTasks}
+                  className="glass-liquid-pill p-2.5 rounded-xl flex items-center justify-between cursor-pointer group border border-white/80 hover:bg-white/80 transition"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shrink-0">
+                      <CheckSquare className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm font-bold text-black group-hover:text-[#7738FF] transition truncate">
+                        {t.title}
+                      </div>
+                      <div className="text-[11px] text-slate-600 font-medium">
+                        {t.dueDate ? `Due ${t.dueDate}` : 'Pending review'} · Assigned to {t.assigneeName || 'Staff'}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-black transition shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Glowing + New Task Action Button */}
         <button
           onClick={() => onQuickAction?.('task')}
-          className="w-full mt-2.5 py-3.5 rounded-2xl glass-liquid-cta font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-black shadow-[0_4px_24px_rgba(119,56,255,0.5),inset_0_1px_1px_rgba(255,255,255,0.45)] border border-white/30 hover:scale-[1.008] transition"
+          className="w-full mt-1.5 py-2.5 rounded-xl glass-liquid-cta font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-black shadow-[0_4px_20px_rgba(119,56,255,0.4),inset_0_1px_1px_rgba(255,255,255,0.45)] border border-white/30 hover:scale-[1.006] transition"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>New Task</span>
         </button>
       </div>
 
+
+
       {/* 4. QUICK ACTIONS STRIP */}
-      <div className="glass-liquid-tile p-3.5 rounded-2xl flex items-center justify-between gap-2 overflow-x-auto border border-white/80 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
-        <span className="text-xs font-bold text-black uppercase tracking-wider shrink-0 pl-1">
+      <div className="glass-liquid-tile p-4 rounded-2xl flex items-center justify-between gap-3 overflow-x-auto border border-white/80 shadow-[0_4px_16px_rgba(15,23,42,0.04)]">
+        <span className="text-sm font-bold text-black uppercase tracking-wider shrink-0 pl-1">
           Directorate Shortcuts:
         </span>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => onQuickAction?.('meeting')}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 glass-liquid-pill rounded-xl text-sm font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5 text-sky-400" />
+            <Calendar className="w-4 h-4 text-sky-500" />
             <span>Schedule Meeting</span>
           </button>
           <button
             onClick={() => onQuickAction?.('document')}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 glass-liquid-pill rounded-xl text-sm font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <FileText className="w-3.5 h-3.5 text-[#7738FF]" />
+            <FileText className="w-4 h-4 text-[#7738FF]" />
             <span>Upload Document</span>
           </button>
           <button
             onClick={() => onQuickAction?.('announcement')}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 glass-liquid-pill rounded-xl text-sm font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <Megaphone className="w-3.5 h-3.5 text-emerald-400" />
+            <Megaphone className="w-4 h-4 text-emerald-500" />
             <span>Publish Notice</span>
           </button>
           <button
             onClick={() => onQuickAction?.('message')}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-liquid-pill rounded-xl text-xs font-semibold text-black hover:bg-white/80 transition cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 glass-liquid-pill rounded-xl text-sm font-semibold text-black hover:bg-white/80 transition cursor-pointer"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-[#9A75FF]" />
+            <MessageSquare className="w-4 h-4 text-[#9A75FF]" />
             <span>Compose Message</span>
           </button>
         </div>
@@ -385,8 +427,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </table>
           </div>
         ) : (
-          <div className="text-center py-8 text-xs text-black">
-            No pending tasks assigned
+          <div className="text-center py-8 text-xs text-slate-500 font-medium">
+            No assigned tasks.
           </div>
         )}
       </div>
@@ -437,8 +479,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 text-xs text-black">
-            No recent communications recorded
+          <div className="text-center py-6 text-xs text-slate-500 font-medium">
+            No conversations yet.
           </div>
         )}
       </div>
@@ -482,8 +524,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-xs text-black">
-              No recent documents found
+            <div className="text-center py-6 text-xs text-slate-500 font-medium">
+              No recent documents.
             </div>
           )}
         </div>
@@ -547,8 +589,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               })}
             </div>
           ) : (
-            <div className="text-center py-6 text-xs text-black">
-              No active announcements published
+            <div className="text-center py-6 text-xs text-slate-500 font-medium">
+              No announcements available.
             </div>
           )}
         </div>

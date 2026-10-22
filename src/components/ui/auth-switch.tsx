@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, type FormEvent } from "react";
-import { User, Lock, Mail, Eye, EyeOff, ShieldCheck, KeyRound, Building2, HelpCircle, CheckCircle2, AlertTriangle, ArrowRight, Sparkles } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 
 interface AuthSwitchProps {
   onLoginSuccess?: (user: any) => void;
@@ -16,52 +14,6 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
-
-  // Helper for offline LAN authentication fallback
-  const triggerOfflineFallback = (cleanIdentifier: string) => {
-    let name = 'Ekow Eshun';
-    let email = 'ekow.eshun@nya.gov.gh';
-    let username = 'ekow.eshun';
-    let role = 'HR_ADMIN';
-    let roleTitle = 'HEAD OF HR & OPERATIONS';
-    let id = 'u1';
-
-    const lower = cleanIdentifier.toLowerCase();
-    if (lower.includes('frimpong')) {
-      name = 'Akosua Frimpong';
-      email = 'a.frimpong@nya.gov.gh';
-      username = 'a.frimpong';
-      role = 'HR_MANAGER';
-      roleTitle = 'Principal HR Officer';
-      id = 'u2';
-    } else if (lower.includes('gloria') || lower.includes('oforiwaa')) {
-      name = 'Miss Gloria';
-      email = 'miss.gloria@nya.gov.gh';
-      username = 'miss.gloria';
-      role = 'HR_OFFICER';
-      roleTitle = 'Senior Personnel Officer';
-      id = 'u4';
-    }
-
-    const fallbackUser = {
-      id,
-      name,
-      email,
-      username,
-      role,
-      roleTitle,
-      avatarText: name.split(' ').map(n => n[0]).join(''),
-      avatarBg: '#006b3f',
-      status: 'ACTIVE',
-      department: 'Human Resources Directorate',
-      joinedDate: '2022-03-01'
-    };
-
-    localStorage.setItem('nya_user', JSON.stringify(fallbackUser));
-    if (onLoginSuccess) {
-      onLoginSuccess(fallbackUser);
-    }
-  };
 
   // Handle Sign In Submit
   const onSignInSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -84,15 +36,12 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        if (cleanId.includes('@nya.gov.gh') || cleanId.includes('ekow') || cleanId.includes('eshun') || cleanId.includes('christian') || cleanId.includes('gloria') || cleanId.includes('oforiwaa') || cleanId.includes('frimpong')) {
-          triggerOfflineFallback(cleanId);
-          return;
-        }
-
         if (data.remainingAttempts !== undefined) {
           setRemainingAttempts(data.remainingAttempts);
+        } else {
+          setRemainingAttempts(null);
         }
-        setErrorMessage(data.error || "Authentication failed. Check credentials.");
+        setErrorMessage(data.error || "Authentication failed. Invalid username or password.");
         return;
       }
 
@@ -104,26 +53,13 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
         }
       }
     } catch (err: any) {
-      triggerOfflineFallback(cleanId);
+      setErrorMessage("Unable to connect to HR Central authentication server. Please check your network connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper to quickly fill credentials for testers/evaluators
-  const fillCredentials = (userType: 'admin' | 'manager' | 'officer') => {
-    if (userType === 'admin') {
-      setIdentifier("ekow.eshun@nya.gov.gh");
-      setPassword("Admin@2026!NYA");
-    } else if (userType === 'manager') {
-      setIdentifier("a.frimpong@nya.gov.gh");
-      setPassword("Staff@2026!NYA");
-    } else {
-      setIdentifier("miss.gloria@nya.gov.gh");
-      setPassword("Staff@2026!NYA");
-    }
-    setErrorMessage(null);
-  };
+
 
   return (
     <div 
@@ -137,51 +73,27 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
 
       {/* Main Glassmorphic Container Card - Transparent Frosted Glass */}
       <div className="w-full max-w-[920px] glass-liquid-window rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10 border border-white/80 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.08),0_0_40px_rgba(59,130,246,0.10)]">
-        {/* Left Side: Brand & Visual Overview */}
-        <div className="relative p-8 lg:p-12 flex flex-col justify-between bg-white/[0.25] backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/50 overflow-hidden shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.85)]">
+        {/* Left Side: Welcome to HR department */}
+        <div className="relative p-8 lg:p-12 flex flex-col items-center justify-center text-center bg-white/[0.25] backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/50 overflow-hidden shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.85)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#7738FF]/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/10 rounded-full blur-2xl pointer-events-none"></div>
 
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#7738FF]/30 via-[#9A75FF]/15 to-transparent p-0.5 border border-white/85 shadow-xs shrink-0 flex items-center justify-center overflow-hidden">
-                <img
-                  src="/logo.jpg"
-                  alt="National Youth Authority Ghana"
-                  className="w-full h-full object-contain rounded-xl bg-white p-0.5"
-                />
-              </div>
-              <div>
-                <div className="font-bold text-black tracking-tight text-base leading-tight">
-                  HR Central
-                </div>
-                <div className="text-[10px] text-[#7738FF] font-bold tracking-wider uppercase">
-                  National Youth Authority · Ghana
-                </div>
-              </div>
+          <div className="relative z-10 flex flex-col items-center justify-center max-w-sm mx-auto my-auto">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white/90 p-2.5 border border-white/95 shadow-md flex items-center justify-center mb-6">
+              <img
+                src="/logo.jpg"
+                alt="National Youth Authority Ghana"
+                className="w-full h-full object-contain rounded-2xl"
+              />
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-bold text-black tracking-tight leading-tight mt-6">
-              Executive Staff & Operations Portal
+            <div className="font-extrabold text-[#7738FF] tracking-widest text-xs uppercase mb-2">
+              HR Central
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-black tracking-tight leading-tight">
+              Welcome to HR department
             </h1>
-            <p className="text-xs text-black mt-3 leading-relaxed">
-              Internal human resources, national service personnel postings, youth training institute management, and secure local messaging.
-            </p>
-          </div>
-
-          <div className="pt-8 space-y-3">
-            <div className="p-3.5 rounded-2xl bg-white/60 border border-slate-200/80 shadow-xs text-xs text-black">
-              <div className="font-bold text-black flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
-                <span>LAN Offline Architecture</span>
-              </div>
-              <div className="text-[11px] text-black mt-1">
-                Zero external dependencies. Operates seamlessly across local area office networks.
-              </div>
-            </div>
-
-            <div className="text-[10px] text-black font-mono text-center">
-              NYA HR Central Engine · Secure Local Instance v4.2
-            </div>
           </div>
         </div>
 
@@ -196,14 +108,14 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
             </p>
 
             {errorMessage && (
-              <div className="mb-4 p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+              <div className="mb-4 p-3 bg-rose-50/95 border border-rose-300 rounded-xl text-rose-700 font-semibold text-xs flex items-center gap-2 shadow-xs">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {remainingAttempts !== null && remainingAttempts < 5 && (
-              <div className="mb-4 p-2.5 bg-amber-500/15 border border-amber-500/30 rounded-xl text-amber-300 text-xs">
+              <div className="mb-4 p-2.5 bg-amber-50/95 border border-amber-300 rounded-xl text-amber-800 font-semibold text-xs">
                 ⚠️ Security Notice: {remainingAttempts} attempt(s) remaining before account lockout.
               </div>
             )}
@@ -266,39 +178,6 @@ export default function AuthSwitch({ onLoginSuccess }: AuthSwitchProps) {
                 </button>
               </div>
             </form>
-
-            {/* Quick Fill Test Credentials */}
-            <div className="mt-8 pt-6 border-t border-slate-200/80">
-              <div className="text-[11px] font-bold text-black uppercase tracking-wider mb-2.5">
-                Quick Fill Test Credentials:
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('admin')}
-                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
-                  title="Head of HR & Admin"
-                >
-                  Head of HR (Admin)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('manager')}
-                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
-                  title="Principal HR Officer"
-                >
-                  Principal HR Officer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillCredentials('officer')}
-                  className="px-2.5 py-1.5 rounded-lg glass-liquid-pill text-black hover:text-black text-[11px] font-semibold transition cursor-pointer"
-                  title="Personnel Officer"
-                >
-                  Personnel Officer
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

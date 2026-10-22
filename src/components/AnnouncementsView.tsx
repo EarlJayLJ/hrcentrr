@@ -5,6 +5,7 @@ import { Announcement, User } from '../types.ts';
 interface AnnouncementsViewProps {
   announcements: Announcement[];
   currentUser: User;
+  searchQuery?: string;
   onNewAnnouncement: () => void;
   onAcknowledge: (id: string) => void;
   onDeleteAnnouncement?: (id: string) => void;
@@ -13,21 +14,23 @@ interface AnnouncementsViewProps {
 export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
   announcements,
   currentUser,
+  searchQuery = '',
   onNewAnnouncement,
   onAcknowledge,
   onDeleteAnnouncement
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearch, setLocalSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   const canPublish = ['HR_ADMIN', 'HR_MANAGER'].includes(currentUser.role);
-
   const categories = ['ALL', 'General', 'Policy Update', 'Emergency', 'Holiday', 'Benefits'];
+
+  const effectiveSearch = (localSearch || searchQuery || '').trim().toLowerCase();
 
   const filteredAnnouncements = announcements.filter((ann) => {
     if (ann.isDraft && !canPublish) return false;
     if (selectedCategory !== 'ALL' && ann.category !== selectedCategory) return false;
-    if (searchQuery && !ann.title.toLowerCase().includes(searchQuery.toLowerCase()) && !ann.content.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (effectiveSearch && !ann.title.toLowerCase().includes(effectiveSearch) && !ann.content.toLowerCase().includes(effectiveSearch)) {
       return false;
     }
     return true;
@@ -79,10 +82,10 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7738FF]" />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={localSearch || searchQuery}
+            onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="Search notices..."
-            className="pl-8 pr-4 py-1.5 bg-white/80 text-black hover:bg-white/[0.07] focus:bg-white/[0.09] text-black placeholder-[#A6B0C8]/50 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-full sm:w-64 transition shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]"
+            className="pl-8 pr-4 py-1.5 bg-white/80 text-black hover:bg-white focus:bg-white placeholder-slate-500 text-xs rounded-xl border border-white/80 focus:border-[#7738FF] focus:outline-none w-full sm:w-64 transition shadow-xs"
           />
         </div>
       </div>
@@ -182,8 +185,8 @@ export const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({
         })}
 
         {filteredAnnouncements.length === 0 && (
-          <div className="text-center py-12 text-xs text-black glass-liquid-tile rounded-2xl border border-slate-200/80">
-            No notices found matching current criteria.
+          <div className="text-center py-12 text-xs text-slate-600 glass-liquid-tile rounded-2xl border border-slate-200/80 font-medium">
+            {announcements.length === 0 ? 'No announcements available.' : 'No notices match the selected criteria.'}
           </div>
         )}
       </div>

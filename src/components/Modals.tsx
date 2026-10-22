@@ -13,8 +13,8 @@ export const NewCaseModal: React.FC<{
   const [caseNumber, setCaseNumber] = useState(`HR-2026-${Math.floor(100 + Math.random() * 900)}`);
   const [category, setCategory] = useState<string>('Postings & Deployment');
   const [priority, setPriority] = useState<Priority>('Medium');
-  const [dates, setDates] = useState('May 18, 2024 - May 25, 2024');
-  const [attachmentName, setAttachmentName] = useState('NYA_Posting_Schedule.doc');
+  const [dates, setDates] = useState('');
+  const [attachmentName, setAttachmentName] = useState('');
   const [country, setCountry] = useState('Greater Accra');
   const [assigneeId, setAssigneeId] = useState(users[0]?.id || 'u1');
 
@@ -191,37 +191,85 @@ export const NewCaseModal: React.FC<{
   );
 };
 
+function getLocalDateString(d: Date = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatDayLabelFromDate(dateStr: string): string {
+  if (!dateStr) return 'UPCOMING';
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
+  const [y, m, d] = parts;
+  const dt = new Date(y, m - 1, d);
+  const todayStr = getLocalDateString();
+  if (dateStr === todayStr) {
+    return `TODAY · ${dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}`;
+  }
+  const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+  const month = dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  return `${weekday}, ${month} ${d}`;
+}
+
 // 2. New Task Modal
 export const NewTaskModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (taskData: any) => void;
   users: UserType[];
+  currentUser?: UserType;
+  canAssignToOthers?: boolean;
   defaultIsMyTask?: boolean;
-}> = ({ isOpen, onClose, onSubmit, users, defaultIsMyTask = true }) => {
+}> = ({ isOpen, onClose, onSubmit, users, currentUser, canAssignToOthers = false, defaultIsMyTask = true }) => {
+  const currentUserId = currentUser?.id || users[0]?.id;
+  const todayDefault = getLocalDateString();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
-  const [dueDate, setDueDate] = useState('May 25, 2024');
-  const [assigneeId, setAssigneeId] = useState(defaultIsMyTask ? users[0]?.id : users[1]?.id || users[0]?.id);
+  const [dueDate, setDueDate] = useState(todayDefault);
+  const [dueTime, setDueTime] = useState('17:00');
+  const [assigneeId, setAssigneeId] = useState(
+    canAssignToOthers && !defaultIsMyTask
+      ? (users.find(u => u.id !== currentUserId)?.id || currentUserId)
+      : currentUserId
+  );
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setDueDate(getLocalDateString());
+      setAssigneeId(
+        canAssignToOthers && !defaultIsMyTask
+          ? (users.find(u => u.id !== currentUserId)?.id || currentUserId)
+          : currentUserId
+      );
+    }
+  }, [isOpen, canAssignToOthers, defaultIsMyTask, currentUserId, users]);
 
   if (!isOpen) return null;
 
+  const effectiveAssigneeId = canAssignToOthers ? assigneeId : currentUserId;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    const assignee = users.find(u => u.id === assigneeId) || users[0];
+    if (!title.trim() || !dueDate || !dueTime) return;
+    const assignee = users.find(u => u.id === effectiveAssigneeId) || currentUser || users[0];
+    const isMyTask = assignee.id === currentUserId;
     onSubmit({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       priority,
       status: 'PENDING',
       dueDate,
+      dueTime,
       assigneeId: assignee.id,
       assigneeName: assignee.name,
       category: 'Operations',
-      isMyTask: assignee.id === users[0]?.id
+      isMyTask
     });
+    setTitle('');
+    setDescription('');
     onClose();
   };
 
@@ -262,7 +310,7 @@ export const NewTaskModal: React.FC<{
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2.5">
             <div>
               <label className="block font-semibold text-black mb-1">Priority</label>
               <select
@@ -279,27 +327,52 @@ export const NewTaskModal: React.FC<{
             <div>
               <label className="block font-semibold text-black mb-1">Due Date</label>
               <input
-                type="text"
+                type="date"
+                required
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition"
+                className="w-full px-2.5 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-medium"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-black mb-1">Due Time</label>
+              <input
+                type="time"
+                required
+                value={dueTime}
+                onChange={e => setDueTime(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-black mb-1">Assignee</label>
-            <select
-              value={assigneeId}
-              onChange={e => setAssigneeId(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-white/80 text-black border border-white/80 text-black focus:outline-none"
-            >
-              {users.map(u => (
-                <option key={u.id} value={u.id}>
-                  {u.name} ({u.roleTitle})
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-semibold text-black">Assignee</label>
+              {!canAssignToOthers && (
+                <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-semibold border border-amber-200">
+                  Director Only: Delegation to staff
+                </span>
+              )}
+            </div>
+            {canAssignToOthers ? (
+              <select
+                value={assigneeId}
+                onChange={e => setAssigneeId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-white/80 text-black border border-white/80 text-black focus:outline-none"
+              >
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.roleTitle})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="w-full px-3 py-2 rounded-xl bg-slate-100 text-black border border-slate-200 text-xs font-semibold flex items-center justify-between">
+                <span>{currentUser?.name || users[0]?.name} (Self / My Tasks)</span>
+                <span className="text-[10px] text-slate-500 font-normal">Assigned to self</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200/80">
@@ -329,39 +402,82 @@ export const NewMeetingModal: React.FC<{
   onClose: () => void;
   onSubmit: (meetingData: any) => void;
   users: UserType[];
-}> = ({ isOpen, onClose, onSubmit, users }) => {
+}> = ({ isOpen, onClose, onSubmit }) => {
+  const todayDefault = getLocalDateString();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dayLabel, setDayLabel] = useState('WED 18');
-  const [date, setDate] = useState('2024-05-18');
+  const [date, setDate] = useState(todayDefault);
+  const [dayLabel, setDayLabel] = useState(() => formatDayLabelFromDate(todayDefault));
   const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('10:30');
-  const [location, setLocation] = useState('Conference Room Alpha');
+  const [endTime, setEndTime] = useState('10:00');
+  const [location, setLocation] = useState('Directorate Meeting Room');
   const [colorBar, setColorBar] = useState('#8b5cf6');
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const currentDay = getLocalDateString();
+      setDate(currentDay);
+      setDayLabel(formatDayLabelFromDate(currentDay));
+      setStartTime('09:00');
+      setEndTime('10:00');
+      setValidationError(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate);
+    setDayLabel(formatDayLabelFromDate(newDate));
+    setValidationError(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    setValidationError(null);
+
+    if (!title.trim()) {
+      setValidationError('Please enter a meeting title.');
+      return;
+    }
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      setValidationError('Please select a valid meeting date from the calendar picker.');
+      return;
+    }
+    if (!startTime || !/^\d{2}:\d{2}$/.test(startTime)) {
+      setValidationError('Please select a valid start time.');
+      return;
+    }
+    if (!endTime || !/^\d{2}:\d{2}$/.test(endTime)) {
+      setValidationError('Please select a valid end time.');
+      return;
+    }
+    if (endTime <= startTime) {
+      setValidationError('End time must be later than start time.');
+      return;
+    }
+
     onSubmit({
-      title,
-      description,
-      dayLabel,
+      title: title.trim(),
+      description: description.trim() || 'Scheduled HR Directorate session',
+      dayLabel: dayLabel.trim() || formatDayLabelFromDate(date),
       date,
       startTime,
       endTime,
-      location,
+      location: location.trim() || 'Directorate Meeting Room',
       colorBar,
-      participants: ['Peter Malby', 'Arthur Adelk'],
+      participants: ['All HR Staff'],
       status: 'UPCOMING'
     });
+    setTitle('');
+    setDescription('');
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 select-none">
-      <div className="glass-liquid-window bg-white/95 rounded-3xl p-6  shadow-[0_25px_60px_-15px_rgba(15,23,42,0.14),0_0_40px_rgba(119,56,255,0.08)] border border-white/20 text-black animate-in fade-in zoom-in-95">
+      <div className="glass-liquid-window bg-white/95 rounded-3xl p-6 max-w-md w-full shadow-[0_25px_60px_-15px_rgba(15,23,42,0.14),0_0_40px_rgba(119,56,255,0.08)] border border-white/20 text-black animate-in fade-in zoom-in-95">
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/80">
           <h3 className="text-sm font-bold text-black flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-violet-400"></span>
@@ -373,6 +489,12 @@ export const NewMeetingModal: React.FC<{
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5 pt-4 text-xs">
+          {validationError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-semibold text-xs">
+              {validationError}
+            </div>
+          )}
+
           <div>
             <label className="block font-semibold text-black mb-1">Meeting Title</label>
             <input
@@ -385,13 +507,77 @@ export const NewMeetingModal: React.FC<{
             />
           </div>
 
+          <div>
+            <label className="block font-semibold text-black mb-1">Description / Agenda</label>
+            <textarea
+              rows={2}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Brief agenda or discussion items..."
+              className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            <div>
+              <label className="block font-semibold text-black mb-1">Meeting Date</label>
+              <input
+                type="date"
+                required
+                value={date}
+                onChange={e => handleDateChange(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-medium"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-black mb-1">Start Time</label>
+              <input
+                type="time"
+                required
+                value={startTime}
+                onChange={e => {
+                  setStartTime(e.target.value);
+                  setValidationError(null);
+                }}
+                className="w-full px-2.5 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-medium"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-black mb-1">End Time</label>
+              <input
+                type="time"
+                required
+                value={endTime}
+                onChange={e => {
+                  setEndTime(e.target.value);
+                  setValidationError(null);
+                }}
+                className="w-full px-2.5 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-medium"
+              />
+            </div>
+          </div>
+
+          {/* Clear display of selected date and time */}
+          {date && startTime && endTime && (
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-violet-50/90 border border-violet-200/80 text-[11px]">
+              <span className="font-semibold text-black flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#7738FF]" />
+                <span>Selected: {formatDayLabelFromDate(date)} ({date})</span>
+              </span>
+              <span className="font-mono font-bold text-[#7738FF]">
+                {startTime} – {endTime}
+              </span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-black mb-1">Day Tag (e.g. MON 16)</label>
+              <label className="block font-semibold text-black mb-1">Day Tag</label>
               <input
                 type="text"
                 value={dayLabel}
                 onChange={e => setDayLabel(e.target.value)}
+                placeholder="e.g. MON 16"
                 className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition"
               />
             </div>
@@ -401,30 +587,8 @@ export const NewMeetingModal: React.FC<{
                 type="text"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
+                placeholder="Directorate Meeting Room"
                 className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block font-semibold text-black mb-1">Start Time</label>
-              <input
-                type="text"
-                value={startTime}
-                onChange={e => setStartTime(e.target.value)}
-                placeholder="09:00"
-                className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-mono"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-black mb-1">End Time</label>
-              <input
-                type="text"
-                value={endTime}
-                onChange={e => setEndTime(e.target.value)}
-                placeholder="10:30"
-                className="w-full px-3 py-2 rounded-xl bg-white/80 text-black hover:bg-white focus:bg-white/80 text-black border border-white/80 focus:border-violet-500 text-black placeholder-slate-400 focus:outline-none transition font-mono"
               />
             </div>
           </div>
@@ -680,7 +844,7 @@ export const NewAnnouncementModal: React.FC<{
   const [priority, setPriority] = useState<Priority>('Medium');
   const [pinned, setPinned] = useState(false);
   const [isDraft, setIsDraft] = useState(false);
-  const [expiryDate, setExpiryDate] = useState('2026-12-31');
+  const [expiryDate, setExpiryDate] = useState('');
 
   if (!isOpen) return null;
 
@@ -825,19 +989,7 @@ export const NewAnnouncementModal: React.FC<{
 export const NewUserModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (userData: {
-    name: string;
-    email: string;
-    username: string;
-    initialPassword?: string;
-    mustChangePassword?: boolean;
-    role: UserRole;
-    roleTitle: string;
-    department: string;
-    avatarText: string;
-    avatarBg: string;
-    status: 'ACTIVE' | 'INACTIVE';
-  }) => void;
+  onSubmit: (userData: any) => Promise<{ success: boolean; error?: string }> | any;
 }> = ({ isOpen, onClose, onSubmit }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -847,12 +999,18 @@ export const NewUserModal: React.FC<{
   const [role, setRole] = useState<UserRole>('HR_OFFICER');
   const [roleTitle, setRoleTitle] = useState('Personnel Officer');
   const [department, setDepartment] = useState('Human Resources Directorate');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    setError(null);
+    if (!name.trim() || !email.trim()) {
+      setError('Full official name and email address are required.');
+      return;
+    }
 
     const initials = name
       .split(' ')
@@ -867,7 +1025,8 @@ export const NewUserModal: React.FC<{
 
     const assignedUsername = username.trim() || email.split('@')[0] || name.toLowerCase().replace(/\s+/g, '.');
 
-    onSubmit({
+    setLoading(true);
+    const result = await onSubmit({
       name: name.trim(),
       email: email.trim(),
       username: assignedUsername,
@@ -880,11 +1039,17 @@ export const NewUserModal: React.FC<{
       avatarBg,
       status: 'ACTIVE'
     });
+    setLoading(false);
 
-    setName('');
-    setEmail('');
-    setUsername('');
-    onClose();
+    if (result && result.success === false) {
+      setError(result.error || 'Failed to create user account.');
+    } else {
+      setName('');
+      setEmail('');
+      setUsername('');
+      setError(null);
+      onClose();
+    }
   };
 
   return (
@@ -901,6 +1066,12 @@ export const NewUserModal: React.FC<{
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 pt-4 text-xs">
+          {error && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-medium text-xs">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="block font-semibold text-black mb-1">Full Official Name</label>
             <input
@@ -1034,9 +1205,10 @@ export const NewUserModal: React.FC<{
             </button>
             <button
               type="submit"
-              className="px-4 py-2 glass-liquid-cta rounded-xl font-bold text-black transition cursor-pointer"
+              disabled={loading}
+              className="px-4 py-2 glass-liquid-cta rounded-xl font-bold text-black transition cursor-pointer disabled:opacity-50"
             >
-              Provision Account
+              {loading ? 'Provisioning...' : 'Provision Account'}
             </button>
           </div>
         </form>
@@ -1314,16 +1486,43 @@ export const ChangePasswordModal: React.FC<{
 
     setLoading(true);
     try {
+      const token = localStorage.getItem('nya_session_id');
+      let storedUser: any = null;
+      try {
+        storedUser = JSON.parse(localStorage.getItem('nya_user') || 'null');
+      } catch (e) {}
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        headers['X-Session-ID'] = token;
+      }
+
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+        headers,
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+          userId: storedUser?.id,
+          email: storedUser?.email
+        })
       });
 
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Failed to update password.");
         return;
+      }
+
+      if (data.sessionId) {
+        localStorage.setItem('nya_session_id', data.sessionId);
+      }
+      if (data.user) {
+        localStorage.setItem('nya_user', JSON.stringify(data.user));
       }
 
       setCurrentPassword('');
@@ -1436,9 +1635,18 @@ export const AdminResetPasswordModal: React.FC<{
     setLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('nya_session_id');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        headers['X-Session-ID'] = token;
+      }
+
       const res = await fetch(`/api/admin/users/${targetUser.id}/reset-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ temporaryPassword: temporaryPassword.trim() })
       });
 

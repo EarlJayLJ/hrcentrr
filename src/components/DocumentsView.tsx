@@ -4,6 +4,7 @@ import { DocumentItem } from '../types.ts';
 
 interface DocumentsViewProps {
   documents: DocumentItem[];
+  searchQuery?: string;
   onUploadDocument: () => void;
   onDownloadDocument: (doc: DocumentItem) => void;
   onPreviewDocument: (doc: DocumentItem) => void;
@@ -13,6 +14,7 @@ interface DocumentsViewProps {
 
 export const DocumentsView: React.FC<DocumentsViewProps> = ({
   documents,
+  searchQuery = '',
   onUploadDocument,
   onDownloadDocument,
   onPreviewDocument,
@@ -37,9 +39,18 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
   const folders = Array.from(new Set([...defaultFolders, ...documents.map(d => d.folder).filter(Boolean)]));
 
+  const effectiveSearch = (searchDoc || searchQuery || '').trim().toLowerCase();
+
   const filteredDocs = documents.filter((doc) => {
     if (selectedFolder !== 'ALL' && doc.folder !== selectedFolder) return false;
-    if (searchDoc && !doc.name.toLowerCase().includes(searchDoc.toLowerCase())) return false;
+    if (effectiveSearch) {
+      const match =
+        doc.name.toLowerCase().includes(effectiveSearch) ||
+        (doc.category && doc.category.toLowerCase().includes(effectiveSearch)) ||
+        (doc.folder && doc.folder.toLowerCase().includes(effectiveSearch)) ||
+        (doc.uploadedBy && doc.uploadedBy.toLowerCase().includes(effectiveSearch));
+      if (!match) return false;
+    }
     return true;
   });
 
@@ -356,9 +367,11 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
               {filteredDocs.length === 0 && (
                 <div className="text-center py-10 text-xs text-black space-y-1">
-                  <div className="font-bold text-sm">No documents found</div>
+                  <div className="font-bold text-sm text-slate-800">
+                    {documents.length === 0 ? 'No documents uploaded yet.' : 'No documents match your filter.'}
+                  </div>
                   <div className="text-slate-600">
-                    Documents sent via messages or uploaded will appear here showing who submitted them and the exact time.
+                    Upload official directives or send attachments in messages to build the repository.
                   </div>
                 </div>
               )}
